@@ -31,12 +31,13 @@ class PeminjamanBukuService
             }
 
             // Check if user still has unreturned books
-            $unreturnedBook = PeminjamanBuku::where('user_id', $userId)
+            $unreturnedBook = PeminjamanBuku::with(['user', 'buku', 'denda'])
+                ->where('user_id', $userId)
                 ->where('status', 'dipinjam')
                 ->first();
 
             if ($unreturnedBook) {
-                throw new \Exception('User masih memiliki buku yang belum dikembalikan. Harap kembalikan terlebih dahulu.');
+                throw new \Exception($this->blockedMessage($unreturnedBook));
             }
 
             $pinjamDate = $tanggalPinjam ? Carbon::parse($tanggalPinjam) : Carbon::now();
@@ -75,12 +76,13 @@ class PeminjamanBukuService
                 throw new \Exception('Buku tidak tersedia untuk dipinjam');
             }
 
-            $unreturnedBook = PeminjamanBuku::where('user_id', $userId)
+            $unreturnedBook = PeminjamanBuku::with(['user', 'buku', 'denda'])
+                ->where('user_id', $userId)
                 ->where('status', 'dipinjam')
                 ->first();
 
             if ($unreturnedBook) {
-                throw new \Exception('Anda masih memiliki buku yang belum dikembalikan. Kembalikan terlebih dahulu.');
+                throw new \Exception($this->blockedMessage($unreturnedBook, true));
             }
 
             $existingBorrowing = PeminjamanBuku::where('user_id', $userId)
@@ -169,5 +171,31 @@ class PeminjamanBukuService
 
             return $peminjaman;
         });
+    }
+
+    private function blockedMessage(PeminjamanBuku $unreturned, bool $self = false): string
+    {
+        $judul = $unreturned->buku->judul;
+        $jatuhTempo = $unreturned->tanggal_kembali?->format('d M Y');
+        $selisih = $unreturned->getDaysRemaining();
+        $statusWaktu = $unreturned->isOverdue()
+            ? 'terlambat ' . abs($selisih) . ' hari'
+            : 'masih ' . max($selisih, 0) . ' hari';
+        $denda = $unreturned->denda->where('status', 'unpaid')->first();
+        $nominal = $denda ? $denda->formatted_amount : null;
+
+        $awal = $self
+            ? 'Anda diblokir sistem karena masih memiliki buku yang belum dikembalikan'
+            : "Siswa {$unreturned->user->nama} diblokir sistem karena masih memiliki buku yang belum dikembalikan";
+
+        $pesan = "{$awal}: \"{$judul}\" (jatuh tempo {$jatuhTempo}, {$statusWaktu}).";
+        $pesan .= $nominal
+            ? " Denda yang belum dibayar: {$nominal}."
+            : ' Denda dikenakan sesuai ketentuan perpustakaan.';
+        $pesan .= $self
+            ? ' Silakan kembalikan buku dan lunasi denda terlebih dahulu.'
+            : ' Harap buku dikembalikan dan denda dilunasi terlebih dahulu.';
+
+        return $pesan;
     }
 }

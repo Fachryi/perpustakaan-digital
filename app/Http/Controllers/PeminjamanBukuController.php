@@ -40,7 +40,7 @@ class PeminjamanBukuController extends Controller
 
             return redirect()->back();
         } catch (\Exception $e) {
-            Alert::error('Gagal', $e->getMessage());
+            Alert::error('Gagal Meminjam', $e->getMessage());
 
             return redirect()->back();
         }
@@ -132,8 +132,9 @@ class PeminjamanBukuController extends Controller
             return redirect()->route('admin.peminjaman.index')
                 ->with('success', 'Buku berhasil dipinjamkan ke user!');
         } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage())
-                ->withInput();
+            Alert::error('Siswa Terblokir Peminjaman', $e->getMessage());
+
+            return back()->withInput();
         }
     }
 

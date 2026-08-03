@@ -193,6 +193,23 @@
             </div>
         </header>
         <div class="body flex-grow-1">
+            @if (session('error'))
+                <div class="container-lg px-4 pt-3">
+                    <div class="alert alert-danger alert-dismissible fade show mb-0" role="alert">
+                        <strong>Perhatian:</strong> {{ session('error') }}
+                        <button type="button" class="btn-close" data-coreui-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            @endif
+            @if (session('success'))
+                <div class="container-lg px-4 pt-3">
+                    <div class="alert alert-success alert-dismissible fade show mb-0" role="alert">
+                        {{ session('success') }}
+                        <button type="button" class="btn-close" data-coreui-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            @endif
+            @include('sweetalert::alert')
             @yield('content')
         </div>
         <footer class="footer px-4 text-center justify-content-center">© 2026, SMPN 1 Parangloe</footer>

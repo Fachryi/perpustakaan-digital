@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Buku;
+use App\Models\Denda;
 use App\Models\PeminjamanBuku;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -118,7 +119,7 @@ class PeminjamanBukuService
     public function returnBook($peminjamanId, $currentUserId)
     {
         return DB::transaction(function () use ($peminjamanId, $currentUserId) {
-            $peminjaman = PeminjamanBuku::findOrFail($peminjamanId);
+            $peminjaman = PeminjamanBuku::with(['user', 'buku'])->findOrFail($peminjamanId);
 
             // Check authorization (user can only return their own books or admin can return any)
             $isAdmin = auth()->user()->role === 'admin';
@@ -128,6 +129,23 @@ class PeminjamanBukuService
 
             if ($peminjaman->status !== 'dipinjam' || $peminjaman->approval !== 'approved') {
                 throw new \Exception('Peminjaman tidak valid untuk dikembalikan');
+            }
+
+            // Check if user has unpaid fines
+            $unpaidFines = Denda::whereHas('peminjaman', function ($q) use ($peminjaman) {
+                $q->where('user_id', $peminjaman->user_id);
+            })->where('status', 'unpaid')->get();
+
+            if ($unpaidFines->count() > 0) {
+                $totalDenda = $unpaidFines->sum('jumlah');
+                $formattedTotal = 'Rp ' . number_format($totalDenda, 0, ',', '.');
+                $namaUser = $peminjaman->user->nama ?? 'Siswa';
+
+                $pesan = $isAdmin
+                    ? "Buku tidak dapat dikembalikan. Siswa {$namaUser} masih memiliki denda belum dibayar sebesar {$formattedTotal}. Harap konfirmasi/lunasi denda terlebih dahulu di menu Denda."
+                    : "Buku tidak dapat dikembalikan. Anda masih memiliki denda yang belum dibayar sebesar {$formattedTotal}. Silakan hubungi petugas perpustakaan untuk melunasi denda terlebih dahulu.";
+
+                throw new \Exception($pesan);
             }
 
             // Update peminjaman status

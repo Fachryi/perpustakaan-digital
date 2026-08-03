@@ -55,9 +55,9 @@ class PeminjamanBukuController extends Controller
 
             return redirect()->back();
         } catch (\Exception $e) {
-            Alert::error('Gagal', $e->getMessage());
+            Alert::error('Pengembalian Ditolak', $e->getMessage());
 
-            return redirect()->back();
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
@@ -156,8 +156,12 @@ class PeminjamanBukuController extends Controller
         try {
             $this->peminjamanService->returnBook($id, auth()->id());
 
+            Alert::success('Berhasil', 'Buku berhasil dikembalikan!');
+
             return back()->with('success', 'Buku berhasil dikembalikan!');
         } catch (\Exception $e) {
+            Alert::error('Pengembalian Ditolak', $e->getMessage());
+
             return back()->with('error', $e->getMessage());
         }
     }

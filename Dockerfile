@@ -1,4 +1,4 @@
-FROM php:8.2-cli-alpine
+FROM php:8.3-cli-alpine
 
 RUN apk add --no-cache \
         oniguruma-dev \
@@ -15,6 +15,7 @@ RUN apk add --no-cache \
         gd \
         bcmath
 
+ENV COMPOSER_ALLOW_SUPERUSER=1
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app

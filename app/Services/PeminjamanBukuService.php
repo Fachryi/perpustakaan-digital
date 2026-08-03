@@ -30,14 +30,13 @@ class PeminjamanBukuService
                 throw new \Exception('User sudah meminjam buku ini');
             }
 
-            // Check if user has overdue books
-            $overdueBooks = PeminjamanBuku::where('user_id', $userId)
-                ->active()
-                ->where('tanggal_kembali', '<', Carbon::now())
-                ->count();
+            // Check if user still has unreturned books
+            $unreturnedBook = PeminjamanBuku::where('user_id', $userId)
+                ->where('status', 'dipinjam')
+                ->first();
 
-            if ($overdueBooks > 0) {
-                throw new \Exception('User memiliki buku yang terlambat dikembalikan. Harap kembalikan terlebih dahulu.');
+            if ($unreturnedBook) {
+                throw new \Exception('User masih memiliki buku yang belum dikembalikan. Harap kembalikan terlebih dahulu.');
             }
 
             $pinjamDate = $tanggalPinjam ? Carbon::parse($tanggalPinjam) : Carbon::now();
@@ -61,6 +60,53 @@ class PeminjamanBukuService
                 }
             } else {
                 throw new \Exception("Stok buku sudah habis!");
+            }
+
+            return $peminjaman;
+        });
+    }
+
+    public function pinjamBuku($userId, $bukuId)
+    {
+        return DB::transaction(function () use ($userId, $bukuId) {
+            $buku = Buku::findOrFail($bukuId);
+
+            if (!$buku->isAvailable()) {
+                throw new \Exception('Buku tidak tersedia untuk dipinjam');
+            }
+
+            $unreturnedBook = PeminjamanBuku::where('user_id', $userId)
+                ->where('status', 'dipinjam')
+                ->first();
+
+            if ($unreturnedBook) {
+                throw new \Exception('Anda masih memiliki buku yang belum dikembalikan. Kembalikan terlebih dahulu.');
+            }
+
+            $existingBorrowing = PeminjamanBuku::where('user_id', $userId)
+                ->where('buku_id', $bukuId)
+                ->where('status', 'dipinjam')
+                ->first();
+
+            if ($existingBorrowing) {
+                throw new \Exception('Anda sudah meminjam buku ini');
+            }
+
+            $peminjaman = PeminjamanBuku::create([
+                'user_id' => $userId,
+                'buku_id' => $bukuId,
+                'tanggal_pinjam' => Carbon::now(),
+                'tanggal_kembali' => Carbon::now()->addDays(7),
+                'status' => 'dipinjam',
+                'approval' => 'approved',
+                'approval_by' => $userId
+            ]);
+
+            if ($buku->jumlah > 0) {
+                $buku->decrement('jumlah', 1);
+                if ($buku->jumlah <= 0) {
+                    $buku->update(['status' => 'habis']);
+                }
             }
 
             return $peminjaman;

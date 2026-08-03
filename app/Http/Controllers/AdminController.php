@@ -10,7 +10,7 @@ class AdminController extends Controller
 {
     public function index()
     {
-        $daftaradmin = User::with('prodi')->where('role', 'admin')->paginate(10);
+        $daftaradmin = User::where('role', 'admin')->paginate(10);
         return view('admin.users.index', compact('daftaradmin'));
     }
 

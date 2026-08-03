@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Imports\BukuImport;
 use App\Models\Buku;
 use App\Models\FileBuku;
 use App\Models\Jenis;
@@ -10,7 +9,6 @@ use App\Models\Kelas;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Maatwebsite\Excel\Facades\Excel;
 use RealRashid\SweetAlert\Facades\Alert;
 
 class BukuController extends Controller
@@ -201,13 +199,6 @@ class BukuController extends Controller
         Alert::success('Berhasil menerima buku '.$buku->judul);
 
         return back();
-    }
-
-    public function import(Request $request)
-    {
-        Excel::import(new BukuImport, 'data.xlsx');
-
-        return redirect('/welcome')->with('success', 'All good!');
     }
 
     public function destroy(Buku $buku)

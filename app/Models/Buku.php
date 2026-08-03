@@ -13,7 +13,7 @@ class Buku extends Model
 
     protected $table = 'buku';
 
-    protected $fillable = ['kelas_id', 'file', 'pengarang', 'judul', 'sinopsis', 'jumlah', 'penerbit', 'tahun_terbit', 'jenis_id', 'view', 'status', 'file', 'foto', 'abstrak'];
+    protected $fillable = ['kelas_id', 'file', 'pengarang', 'judul', 'sinopsis', 'jumlah', 'penerbit', 'tahun_terbit', 'jenis_id', 'view', 'status', 'foto', 'abstrak'];
 
     protected $casts = [
         'view' => 'integer',
@@ -80,19 +80,4 @@ class Buku extends Model
     {
         $this->increment('view');
     }
-
-    // public function toSearchableArray(): array
-    // {
-    //     return [
-    //     'judul' => $this->judul,
-    //     'sinopsis' => $this->sinopsis,
-    //     'jenis_id' => $this->jenis_id,
-    //     'kelas_id' => $this->kelas_id
-    //     ];
-    // }
-
-    // public function shouldBeSearchable(): bool
-    // {
-    //     return $this->status === 'tersedia';
-    // }
 }

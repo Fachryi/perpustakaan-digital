@@ -7,6 +7,7 @@ use App\Models\PeminjamanBuku;
 use App\Models\User;
 use App\Services\PeminjamanBukuService;
 use Illuminate\Http\Request;
+use RealRashid\SweetAlert\Facades\Alert;
 use Carbon\Carbon;
 
 class PeminjamanBukuController extends Controller
@@ -28,6 +29,36 @@ class PeminjamanBukuController extends Controller
         PeminjamanBuku::destroy($id);
 
         return redirect('/admin/peminjaman');
+    }
+
+    public function pinjam($bukuId)
+    {
+        try {
+            $this->peminjamanService->pinjamBuku(auth()->id(), $bukuId);
+
+            Alert::success('Berhasil', 'Buku berhasil dipinjam!');
+
+            return redirect()->back();
+        } catch (\Exception $e) {
+            Alert::error('Gagal', $e->getMessage());
+
+            return redirect()->back();
+        }
+    }
+
+    public function kembalikan($id)
+    {
+        try {
+            $this->peminjamanService->returnBook($id, auth()->id());
+
+            Alert::success('Berhasil', 'Buku berhasil dikembalikan!');
+
+            return redirect()->back();
+        } catch (\Exception $e) {
+            Alert::error('Gagal', $e->getMessage());
+
+            return redirect()->back();
+        }
     }
 
     public function index(Request $request)

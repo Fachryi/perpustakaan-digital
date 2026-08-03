@@ -19,16 +19,16 @@
                         <table class="table table-borderless">
                             <tr>
                                 <td><strong>Nama:</strong></td>
-                                <td>{{ $peminjaman->user->name }}</td>
+                                <td>{{ $peminjaman->user->nama }}</td>
                             </tr>
                             <tr>
-                                <td><strong>Email:</strong></td>
-                                <td>{{ $peminjaman->user->email }}</td>
+                                <td><strong>NIM/NIP:</strong></td>
+                                <td>{{ $peminjaman->user->nim_nip }}</td>
                             </tr>
                             <tr>
                                 <td><strong>Role:</strong></td>
                                 <td>
-                                    <span class="badge bg-info">{{ $peminjaman->user->role_name }}</span>
+                                    <span class="badge bg-info">{{ $peminjaman->user->role }}</span>
                                 </td>
                             </tr>
                         </table>
@@ -44,7 +44,7 @@
                             </tr>
                             <tr>
                                 <td><strong>Penulis:</strong></td>
-                                <td>{{ $peminjaman->buku->penulis }}</td>
+                                <td>{{ $peminjaman->buku->pengarang }}</td>
                             </tr>
                             <tr>
                                 <td><strong>Penerbit:</strong></td>
@@ -109,7 +109,7 @@
                         <table class="table table-borderless">
                             <tr>
                                 <td><strong>Disetujui oleh:</strong></td>
-                                <td>{{ $peminjaman->approver->name ?? '-' }}</td>
+                                <td>{{ $peminjaman->approver->nama ?? '-' }}</td>
                             </tr>
                             <tr>
                                 <td><strong>Tanggal Dibuat:</strong></td>

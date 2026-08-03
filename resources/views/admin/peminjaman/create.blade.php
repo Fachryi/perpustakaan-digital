@@ -245,13 +245,6 @@
                 }
                 returnDateInput.min = pinjamDateInput.value;
                 calculateDuration();
-
-                function loadUserStats(userId) {
-                    fetch(`/api/users/${userId}/stats`)
-                        .then(response => response.json())
-                        .then(data => {})
-                        .catch(error => console.log('Stats loading failed'));
-                }
             });
         </script>
     @endpush

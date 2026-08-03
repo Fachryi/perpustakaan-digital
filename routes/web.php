@@ -82,8 +82,6 @@ Route::get('/', function () {
     ->name('login')
     ->middleware('guest');
 
-Route::get('/welcome/import', [BukuController::class, 'import']);
-
 Route::post('/login', function (Request $request) {
     if (Auth::attempt(['nim_nip' => $request->username, 'password' => $request->password])) {
         // The user is being remembered...

@@ -151,7 +151,7 @@
                     </div>
                 </div>
             </form>
-            @if(auth()->check() && auth()->user()->role == 'mahasiswa')
+            @if(auth()->check() && auth()->user()->role == 'siswa')
                 <form action="{{ route('buku.pinjam', $buku->id) }}" method="POST" class="mt-3">
                     @csrf
                     <button class="btn btn-primary" type="submit">Pinjam Buku</button>

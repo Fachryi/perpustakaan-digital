@@ -171,8 +171,8 @@
                                 <td>#{{ $item->id }}</td>
                                 <td>{{ $item->user->nama ?? '-' }}</td>
                                 <td>{{ $item->buku->judul ?? '-' }}</td>
-                                <td>{{ $item->created_at->format('d/m/Y H:i') }}</td>
-                                <td>{{ optional($item->tanggal_kembali)->format('d/m/Y H:i') ?? '-' }}</td>
+                                <td>{{ $item->tanggal_pinjam->format('d/m/Y') }}</td>
+                                <td>{{ optional($item->tanggal_kembali)->format('d/m/Y') ?? '-' }}</td>
                                 <td>
                                     <span
                                         class="badge bg-{{ $item->status === 'returned' ? 'success' : ($item->status === 'active' ? 'primary' : 'danger') }}">

@@ -47,8 +47,8 @@ class LaporanPeminjamanExport implements FromCollection, WithHeadings, WithMappi
             $row->user->nim_nip ?? '-',
             $row->buku->judul ?? '-',
             $row->buku->pengarang ?? '-',
-            $row->created_at->format('d/m/Y H:i'),
-            $row->tanggal_kembali ? \Carbon\Carbon::parse($row->tanggal_kembali)->format('d/m/Y H:i') : '-',
+            $row->tanggal_pinjam ? \Carbon\Carbon::parse($row->tanggal_pinjam)->format('d/m/Y') : '-',
+            $row->tanggal_kembali ? \Carbon\Carbon::parse($row->tanggal_kembali)->format('d/m/Y') : '-',
             ucfirst($row->status),
             $row->keterangan ?? '-',
         ];

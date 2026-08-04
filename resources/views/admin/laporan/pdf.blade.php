@@ -163,7 +163,7 @@
                 <td>{{ $row->user->nama ?? '-' }}</td>
                 <td>{{ $row->user->nim_nip ?? '-' }}</td>
                 <td>{{ $row->buku->judul ?? '-' }}</td>
-                <td>{{ $row->created_at->format('d/m/Y') }}</td>
+                <td>{{ $row->tanggal_pinjam ? \Carbon\Carbon::parse($row->tanggal_pinjam)->format('d/m/Y') : '-' }}</td>
                 <td>{{ $row->tanggal_kembali ? \Carbon\Carbon::parse($row->tanggal_kembali)->format('d/m/Y') : '-' }}</td>
                 <td>{{ $hariTerlambat }} hari</td>
                 <td>
@@ -204,8 +204,8 @@
                 <td>{{ $row->user->nim_nip ?? '-' }}</td>
                 <td>{{ $row->buku->judul ?? '-' }}</td>
                 <td>{{ $row->buku->pengarang ?? '-' }}</td>
-                <td>{{ $row->created_at->format('d/m/Y H:i') }}</td>
-                <td>{{ $row->tanggal_kembali ? \Carbon\Carbon::parse($row->tanggal_kembali)->format('d/m/Y H:i') : '-' }}</td>
+                <td>{{ $row->tanggal_pinjam ? \Carbon\Carbon::parse($row->tanggal_pinjam)->format('d/m/Y') : '-' }}</td>
+                <td>{{ $row->tanggal_kembali ? \Carbon\Carbon::parse($row->tanggal_kembali)->format('d/m/Y') : '-' }}</td>
                 <td>
                     <span class="badge badge-success">Dikembalikan</span>
                 </td>
@@ -236,8 +236,8 @@
                 <td>{{ $row->user->nim_nip ?? '-' }}</td>
                 <td>{{ $row->buku->judul ?? '-' }}</td>
                 <td>{{ $row->buku->pengarang ?? '-' }}</td>
-                <td>{{ $row->created_at->format('d/m/Y H:i') }}</td>
-                <td>{{ $row->tanggal_kembali ? \Carbon\Carbon::parse($row->tanggal_kembali)->format('d/m/Y H:i') : '-' }}</td>
+                <td>{{ $row->tanggal_pinjam ? \Carbon\Carbon::parse($row->tanggal_pinjam)->format('d/m/Y') : '-' }}</td>
+                <td>{{ $row->tanggal_kembali ? \Carbon\Carbon::parse($row->tanggal_kembali)->format('d/m/Y') : '-' }}</td>
                 <td>
                     @if($row->status === 'returned')
                         <span class="badge badge-success">Dikembalikan</span>

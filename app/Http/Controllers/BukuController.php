@@ -65,12 +65,12 @@ class BukuController extends Controller
         $rules = [
             'judul' => ['required', 'max:255'],
             'sinopsis' => ['required'],
-            'jumlah' => ['required'],
+            'jumlah' => ['required', 'numeric', 'min:0'],
             'pengarang' => ['required'],
             'penerbit' => ['required'],
             'tahun_terbit' => ['required'],
-            'file' => ['file', 'mimes:pdf'],
-            'foto' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'file' => ['nullable', 'file', 'mimes:pdf', 'max:20480'],
+            'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'abstrak' => ['nullable', 'string'],
         ];
 
@@ -81,6 +81,10 @@ class BukuController extends Controller
         }
 
         $request->validate($rules);
+
+        // Ensure storage directories exist
+        Storage::disk('public')->makeDirectory('file');
+        Storage::disk('public')->makeDirectory('foto_buku');
 
         $filePath = $request->hasFile('file') ? $request->file('file')->store('file', 'public') : null;
 
@@ -112,7 +116,7 @@ class BukuController extends Controller
             ]);
         }
 
-        Alert::success('Berhasil tambah buku');
+        Alert::success('Berhasil', 'Berhasil tambah buku');
 
         return redirect('/dashboard/buku');
     }
@@ -135,13 +139,14 @@ class BukuController extends Controller
         $rules = [
             'judul' => ['required', 'max:255'],
             'sinopsis' => ['required'],
-            'jumlah' => ['required'],
+            'jumlah' => ['required', 'numeric', 'min:0'],
             'pengarang' => ['required'],
             'penerbit' => ['required'],
             'tahun_terbit' => ['required'],
             'jenis_koleksi' => ['required'],
             'kelas' => ['required'],
-            'file' => ['file', 'mimes:pdf'],
+            'file' => ['nullable', 'file', 'mimes:pdf', 'max:20480'],
+            'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ];
 
         if (auth()->user()->role == 'admin') {
@@ -149,6 +154,10 @@ class BukuController extends Controller
         }
 
         $request->validate($rules);
+
+        // Ensure storage directories exist
+        Storage::disk('public')->makeDirectory('file');
+        Storage::disk('public')->makeDirectory('foto_buku');
 
         $buku->update([
             'judul' => $request->judul,
@@ -188,7 +197,7 @@ class BukuController extends Controller
             $buku->update(['foto' => $request->file('foto')->store('foto_buku', 'public')]);
         }
 
-        Alert::success('Berhasil update buku');
+        Alert::success('Berhasil', 'Berhasil update buku');
 
         return redirect('/dashboard/buku');
     }

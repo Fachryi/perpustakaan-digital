@@ -1,5 +1,4 @@
 /.phpunit.cache
-/.phpunit.result.cache
 /node_modules
 /public/build
 /public/hot
@@ -19,3 +18,6 @@ yarn-error.log
 /.vscode
 /data.ms
 meilisearch
+.phpunit.result.cache
+*.sql
+import_books.php

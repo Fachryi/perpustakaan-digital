@@ -32,11 +32,9 @@
                 <span class="fw-bold">{{ $buku->pengarang }}</span>
             </p>
             <div class="d-flex gap-4 mt-4">
-                @if ($buku->foto)
-                    <div class="flex-shrink-0">
-                        <img src="/storage/{{ $buku->foto }}" alt="{{ $buku->judul }}" class="rounded shadow-sm" style="max-width: 220px; max-height: 300px; object-fit: cover;">
-                    </div>
-                @endif
+                <div class="flex-shrink-0">
+                    <img src="{{ $buku->foto ? '/storage/'.$buku->foto : '/images/book-placeholder.png' }}" alt="{{ $buku->judul }}" class="rounded shadow-sm" style="max-width: 220px; max-height: 300px; object-fit: cover;">
+                </div>
                 <div class="flex-grow-1">
                     <div class="py-1 my-0 border-bottom d-flex align-items-center justify-content-between">
                         <div class="hstack gap-2 align-items-center">
@@ -44,7 +42,7 @@
                         </div>
                         <div class="hstack gap-1">
                             @if ($buku->fileBuku && !empty($buku->fileBuku->file_name))
-                                <a href="/storage/{{ $buku->fileBuku->file_name ?? null }}" class="btn btn-icon link-dark"><i
+                                <a href="/storage/{{ $buku->fileBuku->file_name ?? null }}" download class="btn btn-icon link-dark"><i
                                     class="bi-download"></i></a>
                             @endif 
                             @if (!$buku->fileBuku || empty($buku->fileBuku->file_name))

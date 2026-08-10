@@ -109,11 +109,9 @@
                             <p class="mb-0">{{ $buku->tahun_terbit }}</p>
                         </div>
                         <div class="d-flex gap-3">
-                            @if ($buku->foto)
-                                <div class="flex-shrink-0">
-                                    <img src="/storage/{{ $buku->foto }}" alt="{{ $buku->judul }}" class="rounded" style="width: 80px; height: 110px; object-fit: cover;">
-                                </div>
-                            @endif
+                            <div class="flex-shrink-0">
+                                <img src="{{ $buku->foto ? '/storage/'.$buku->foto : '/images/book-placeholder.png' }}" alt="{{ $buku->judul }}" class="rounded" style="width: 80px; height: 110px; object-fit: cover;">
+                            </div>
                             <div>
                                 <a href="/buku/{{ $buku->id }}">
                                     <h5>

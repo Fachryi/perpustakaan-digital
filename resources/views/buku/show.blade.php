@@ -35,12 +35,10 @@
                         <h6>Abstrak</h6>
                         <p class="mb-0">{{ $buku->abstrak ?? '-' }}</p>
                     </div>
-                    @if ($buku->foto)
-                        <div class="col-12">
-                            <h6>Foto Buku</h6>
-                            <img src="/storage/{{ $buku->foto }}" alt="Foto Buku" class="img-thumbnail" style="max-height: 200px;">
-                        </div>
-                    @endif
+                    <div class="col-12">
+                        <h6>Foto Buku</h6>
+                        <img src="{{ $buku->foto ? '/storage/'.$buku->foto : '/images/book-placeholder.png' }}" alt="Foto Buku" class="img-thumbnail" style="max-height: 200px;">
+                    </div>
                     <div class="col-12">
                         <h6>Jumlah</h6>
                         <p class="mb-0">{{ $buku->jumlah }}</p>

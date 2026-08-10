@@ -138,7 +138,7 @@
                                     @if ($buku->file)
                                         <span data-coreui-toggle="tooltip" data-coreui-title="Unduh buku"><a
                                                 class="btn btn-link btn-sm link-body-emphasis"
-                                                href="/storage/{{ $buku->file->file_name }}" target="_blank"
+                                                href="/storage/{{ $buku->file->file_name }}" target="_blank" download
                                                 aria-label="Unduh buku">
                                                 <svg class="icon icon-lg">
                                                     <use

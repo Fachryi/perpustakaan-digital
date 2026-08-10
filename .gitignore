@@ -20,4 +20,9 @@ yarn-error.log
 meilisearch
 .phpunit.result.cache
 *.sql
-import_books.php
+# Helper scripts (jangan push ke production)
+/import_books.php
+/cleanup_files.php
+/clear_missing_foto.php
+/fix_books.php
+/generate_peminjaman.php

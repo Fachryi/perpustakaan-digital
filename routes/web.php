@@ -265,3 +265,20 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         Route::get('/download', [LaporanController::class, 'download'])->name('admin.laporan.download');
     });
 });
+
+// TEMPORARY IMPORT ROUTE
+Route::get('/import-db-secret-12345', function () {
+    $sqlFile = base_path('digilib_export.sql');
+    if (!file_exists($sqlFile)) return "File not found.";
+    
+    $sql = file_get_contents($sqlFile);
+    \Illuminate\Support\Facades\DB::unprepared("SET FOREIGN_KEY_CHECKS=0;");
+    try {
+        \Illuminate\Support\Facades\DB::unprepared($sql);
+        $res = "Successfully imported database.";
+    } catch (\Exception $e) {
+        $res = "Error: " . $e->getMessage();
+    }
+    \Illuminate\Support\Facades\DB::unprepared("SET FOREIGN_KEY_CHECKS=1;");
+    return $res;
+});

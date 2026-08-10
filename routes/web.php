@@ -269,16 +269,22 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 // TEMPORARY IMPORT ROUTE
 Route::get('/import-db-secret-12345', function () {
     $sqlFile = base_path('digilib_export.sql');
-    if (!file_exists($sqlFile)) return "File not found.";
-    
+    if (!file_exists($sqlFile)) return "File not found at: " . $sqlFile;
+
     $sql = file_get_contents($sqlFile);
-    \Illuminate\Support\Facades\DB::unprepared("SET FOREIGN_KEY_CHECKS=0;");
+    
+    // Use PDO directly to support multiple statements
     try {
-        \Illuminate\Support\Facades\DB::unprepared($sql);
-        $res = "Successfully imported database.";
+        $pdo = \Illuminate\Support\Facades\DB::connection()->getPdo();
+        $pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
+        
+        // Execute with multi query support
+        $pdo->exec("SET FOREIGN_KEY_CHECKS=0;");
+        $pdo->exec($sql);
+        $pdo->exec("SET FOREIGN_KEY_CHECKS=1;");
+        
+        return "Successfully imported database! All data restored.";
     } catch (\Exception $e) {
-        $res = "Error: " . $e->getMessage();
+        return "Error: " . $e->getMessage();
     }
-    \Illuminate\Support\Facades\DB::unprepared("SET FOREIGN_KEY_CHECKS=1;");
-    return $res;
 });

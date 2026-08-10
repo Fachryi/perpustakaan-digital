@@ -82,9 +82,11 @@ class BukuController extends Controller
 
         $request->validate($rules);
 
-        // Ensure storage directories exist
-        Storage::disk('public')->makeDirectory('file');
-        Storage::disk('public')->makeDirectory('foto_buku');
+        // Ensure storage directories exist (for local only)
+        if (config('filesystems.default') === 'local' || config('filesystems.default') === 'public') {
+            Storage::disk('public')->makeDirectory('file');
+            Storage::disk('public')->makeDirectory('foto_buku');
+        }
 
         $filePath = $request->hasFile('file') ? $request->file('file')->store('file', 'public') : null;
 
@@ -155,9 +157,11 @@ class BukuController extends Controller
 
         $request->validate($rules);
 
-        // Ensure storage directories exist
-        Storage::disk('public')->makeDirectory('file');
-        Storage::disk('public')->makeDirectory('foto_buku');
+        // Ensure storage directories exist (for local only)
+        if (config('filesystems.default') === 'local' || config('filesystems.default') === 'public') {
+            Storage::disk('public')->makeDirectory('file');
+            Storage::disk('public')->makeDirectory('foto_buku');
+        }
 
         $buku->update([
             'judul' => $request->judul,
@@ -174,9 +178,7 @@ class BukuController extends Controller
         if ($request->hasFile('file')) {
             $fileBuku = FileBuku::where('buku_id', $buku->id)->first();
             if ($fileBuku && ! empty($fileBuku->file_name)) {
-                if (Storage::disk('public')->exists($fileBuku->file_name)) {
-                    Storage::disk('public')->delete($fileBuku->file_name);
-                }
+                Storage::disk('public')->exists($fileBuku->file_name) && Storage::disk('public')->delete($fileBuku->file_name);
                 $fileBuku->delete();
             }
 
@@ -191,8 +193,8 @@ class BukuController extends Controller
         }
 
         if ($request->hasFile('foto')) {
-            if ($buku->foto && Storage::disk('public')->exists($buku->foto)) {
-                Storage::disk('public')->delete($buku->foto);
+            if ($buku->foto) {
+                Storage::disk('public')->exists($buku->foto) && Storage::disk('public')->delete($buku->foto);
             }
             $buku->update(['foto' => $request->file('foto')->store('foto_buku', 'public')]);
         }

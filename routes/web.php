@@ -273,18 +273,44 @@ Route::get('/import-db-secret-12345', function () {
 
     $sql = file_get_contents($sqlFile);
     
-    // Use PDO directly to support multiple statements
     try {
-        $pdo = \Illuminate\Support\Facades\DB::connection()->getPdo();
-        $pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
+        $db = \Illuminate\Support\Facades\DB::connection();
+        $db->statement("SET FOREIGN_KEY_CHECKS=0");
+        $db->statement("SET SESSION sql_mode=''");
         
-        // Execute with multi query support
-        $pdo->exec("SET FOREIGN_KEY_CHECKS=0;");
-        $pdo->exec($sql);
-        $pdo->exec("SET FOREIGN_KEY_CHECKS=1;");
+        // Split SQL into individual statements
+        $lines = explode("\n", $sql);
+        $statement = '';
+        $count = 0;
+        $errors = [];
         
-        return "Successfully imported database! All data restored.";
+        foreach ($lines as $line) {
+            $line = trim($line);
+            // Skip comments and empty lines
+            if (empty($line) || strpos($line, '--') === 0 || strpos($line, '/*') === 0 || strpos($line, '*/') === 0) {
+                continue;
+            }
+            $statement .= $line . "\n";
+            // Statement ends with semicolon
+            if (substr($line, -1) === ';') {
+                try {
+                    $db->unprepared($statement);
+                    $count++;
+                } catch (\Exception $e) {
+                    $errors[] = substr($statement, 0, 60) . '... => ' . $e->getMessage();
+                }
+                $statement = '';
+            }
+        }
+        
+        $db->statement("SET FOREIGN_KEY_CHECKS=1");
+        
+        $msg = "Imported $count statements successfully.";
+        if (!empty($errors)) {
+            $msg .= "\n\nErrors (" . count($errors) . "):\n" . implode("\n", array_slice($errors, 0, 5));
+        }
+        return nl2br(htmlspecialchars($msg));
     } catch (\Exception $e) {
-        return "Error: " . $e->getMessage();
+        return "Fatal Error: " . $e->getMessage();
     }
 });

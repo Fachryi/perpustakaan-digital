@@ -37,7 +37,7 @@
                     </div>
                     <div class="col-12">
                         <h6>Foto Buku</h6>
-                        <img src="{{ $buku->foto ? '/storage/'.$buku->foto : '/images/book-placeholder.png' }}" alt="Foto Buku" class="img-thumbnail" style="max-height: 200px;">
+                        <img src="{{ $buku->foto ? Storage::url($buku->foto) : '/images/book-placeholder.png' }}" alt="Foto Buku" class="img-thumbnail" style="max-height: 200px;">
                     </div>
                     <div class="col-12">
                         <h6>Jumlah</h6>
@@ -141,7 +141,7 @@
                         <p class="mb-0">{{ $buku->user->prodi->nama }}</p>
                     </div> --}}
                     <div class="col-12">
-                        <h6>Berkas</h6><a class="icon-link" href="/storage/{{ $buku->file->file_name ?? null }}" download
+                        <h6>Berkas</h6><a class="icon-link" href="{{ $buku->file && $buku->file->file_name ? Storage::url($buku->file->file_name) : '#' }}" download
                             target="_blank">
                             <svg class="icon">
                                 <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-file"></use>

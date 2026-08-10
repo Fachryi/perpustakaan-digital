@@ -48,7 +48,7 @@
                         @if ($buku->foto)
                             <div class="mt-2">
                                 <p class="mb-1">Foto saat ini:</p>
-                                <img src="/storage/{{ $buku->foto }}" alt="Foto Buku" class="img-thumbnail" style="max-height: 150px;">
+                                <img src="{{ $buku->foto ? Storage::url($buku->foto) : '/images/book-placeholder.png' }}" alt="Foto Buku" class="img-thumbnail" style="max-height: 150px;">
                             </div>
                         @endif
                         <div id="foto-preview" class="mt-2"></div>
@@ -101,7 +101,7 @@
                         @if ($buku->file)
                             <div class="form-text">
                                 File yang telah terunggah:
-                                <a target="_blank" href="/storage/{{ $buku->file->file_name ?? null }}">{{ basename($buku->file->file_name) }}</a>
+                                <a target="_blank" href="{{ $buku->file && $buku->file->file_name ? Storage::url($buku->file->file_name) : '#' }}">{{ basename($buku->file->file_name ?? '') }}</a>
                             </div>
                         @endif
                     </div>

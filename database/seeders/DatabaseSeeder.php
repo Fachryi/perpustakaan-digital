@@ -19,6 +19,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // 0. Seed Pengaturan dan Kategori
+        $this->call(PengaturanSeeder::class);
+        $this->call(KategoriSeeder::class);
+
         // 1. Seed Kelas
         $kelas7 = Kelas::firstOrCreate(['nama' => 'VII']);
         $kelas8 = Kelas::firstOrCreate(['nama' => 'VIII']);

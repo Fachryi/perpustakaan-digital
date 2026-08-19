@@ -25,17 +25,18 @@
                 @csrf
                 @method('PUT')
                 <div class="row g-3">
-                    <div class="col-12">
-                        <label class="form-label" for="judul">Judul</label>
+                    <div class="col-md-6">
+                        <label class="form-label" for="kode_buku">ID Buku</label>
+                        <input class="form-control bg-light" id="kode_buku" name="kode_buku"
+                            value="{{ $buku->kode_buku ?? 'Belum digenerate' }}" readonly>
+                        <div class="form-text">ID buku digenerate otomatis oleh sistem.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="judul">Judul <span class="text-danger">*</span></label>
                         <input class="form-control" id="judul" value="{{ $buku->judul }}"
-                            placeholder="Strategi Pengelolaan Limbah Industri untuk Lingkungan Bersih" name="judul">
+                            placeholder="Judul Buku" name="judul">
                     </div>
 
-                    <div class="col-12">
-                        <label class="form-label" for="sinopsis">Sinopsis</label>
-                        <textarea class="form-control" id="sinopsis" name="sinopsis" rows="4"
-                            placeholder="sinopsis">{{ $buku->sinopsis }}</textarea>
-                    </div>
                     <div class="col-12">
                         <label class="form-label" for="abstrak">Abstrak</label>
                         <textarea class="form-control" id="abstrak" name="abstrak" rows="4"
@@ -75,7 +76,7 @@
                             placeholder="2020" value="{{ $buku->tahun_terbit }}">
                     </div>
 
-                    <div class="col-12">
+                    <div class="col-md-6">
                         <label class="form-label" id="jenis-label" for="jenis">Jenis Koleksi</label>
                         <select class="form-select" id="jenis" name="jenis_koleksi" aria-labelledby="jenis-label">
                             @foreach ($daftarJenis as $jenis)
@@ -85,11 +86,23 @@
                         </select>
                     </div>
 
-                    <div class="col-12">
+                    <div class="col-md-6">
                         <label class="form-label" id="kelas-label" for="kelas">Kelas</label>
                         <select class="form-select" id="kelas" name="kelas" aria-labelledby="kelas-label">
                             @foreach ($daftarKelas as $kelas)
                                 <option @selected($kelas->id == $buku->kelas_id) value="{{ $kelas->id }}">{{ $kelas->nama }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="kategori_id">Kategori Buku</label>
+                        <select class="form-select" id="kategori_id" name="kategori_id">
+                            <option value="">-- Pilih Kategori --</option>
+                            @foreach ($daftarKategori as $kat)
+                                <option value="{{ $kat->id }}" @selected($kat->id == $buku->kategori_id)>
+                                    {{ $kat->nama }}
                                 </option>
                             @endforeach
                         </select>

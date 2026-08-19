@@ -13,7 +13,7 @@ class Buku extends Model
 
     protected $table = 'buku';
 
-    protected $fillable = ['kelas_id', 'file', 'pengarang', 'judul', 'sinopsis', 'jumlah', 'penerbit', 'tahun_terbit', 'jenis_id', 'view', 'status', 'foto', 'abstrak'];
+    protected $fillable = ['kelas_id', 'file', 'pengarang', 'judul', 'sinopsis', 'jumlah', 'penerbit', 'tahun_terbit', 'jenis_id', 'kategori_id', 'view', 'status', 'foto', 'abstrak', 'kode_buku', 'user_id'];
 
     protected $casts = [
         'view' => 'integer',
@@ -49,6 +49,12 @@ class Buku extends Model
     public function kelas(): BelongsTo
     {
         return $this->belongsTo(Kelas::class);
+    }
+
+    // Relationship dengan Kategori
+    public function kategori(): BelongsTo
+    {
+        return $this->belongsTo(Kategori::class, 'kategori_id');
     }
 
     // Relationship dengan PeminjamanBuku

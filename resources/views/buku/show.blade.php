@@ -23,7 +23,11 @@
                                                                                                                                   -->
             <form>
                 <div class="row g-3">
-                    <div class="col-12">
+                    <div class="col-md-6">
+                        <h6>ID Buku</h6>
+                        <p class="mb-0"><span class="badge bg-secondary fs-6">{{ $buku->kode_buku ?? '-' }}</span></p>
+                    </div>
+                    <div class="col-md-6">
                         <h6>Judul</h6>
                         <p class="mb-0">{{ $buku->judul }}</p>
                     </div>
@@ -58,56 +62,47 @@
                     <div class="col-12">
                         <h6>Jenis Buku</h6>
                         <p class="mb-0">
-                             @if ($buku->jenis_id == 1)
-                                    <span class="badge text-white fw-normal text-bg-danger text-capitalize">
-                                        {{ $buku->jenis->nama }}
-                                    </span>
-                                @endif
-                                @if ($buku->jenis_id == 2)
-                                    <span class="badge text-white fw-normal text-bg-success text-capitalize">
-                                        {{ $buku->jenis->nama }}
-                                    </span>
-                                @endif
-                                @if ($buku->jenis_id == 3)
-                                    <span class="badge text-white fw-normal text-bg-info text-capitalize">
-                                        {{ $buku->jenis->nama }}
-                                    </span>
-                                @endif
-                                @if ($buku->jenis_id > 3)
-                                    <span class="badge text-white fw-normal text-bg-secondary text-capitalize">
-                                        {{ $buku->jenis->nama }}
-                                    </span>
-                                @endif
+                            @if($buku->jenis)
+                                @php
+                                    $colors = ['danger','success','info','primary','warning'];
+                                    $color = $colors[($buku->jenis_id - 1) % count($colors)] ?? 'secondary';
+                                @endphp
+                                <span class="badge text-white fw-normal text-bg-{{ $color }} text-capitalize">
+                                    {{ $buku->jenis->nama }}
+                                </span>
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
                         </p>
                     </div>
                     <div class="col-12">
                         <h6>Kelas</h6>
                         <p class="mb-0">
-                             @if ($buku->kelas_id == 1)
-                                    <span class="badge text-white fw-normal text-bg-secondary text-capitalize">
-                                        {{ $buku->kelas->nama }}
-                                    </span>
-                                @endif
-                                @if ($buku->kelas_id == 2)
-                                    <span class="badge text-white fw-normal text-bg-secondary text-capitalize">
-                                        {{ $buku->kelas->nama }}
-                                    </span>
-                                @endif
-                                @if ($buku->kelas_id == 3)
-                                    <span class="badge text-white fw-normal text-bg-secondary text-capitalize">
-                                        {{ $buku->kelas->nama }}
-                                    </span>
-                                @endif
-                                @if ($buku->kelas_id > 3)
-                                    <span class="badge text-white fw-normal text-bg-secondary text-capitalize">
-                                        {{ $buku->kelas->nama }}
-                                    </span>
-                                @endif
+                            @if($buku->kelas)
+                                <span class="badge text-white fw-normal text-bg-secondary text-capitalize">
+                                    {{ $buku->kelas->nama }}
+                                </span>
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
+                        </p>
+                    </div>
+
+                    <div class="col-12">
+                        <h6>Kategori</h6>
+                        <p class="mb-0">
+                            @if($buku->kategori)
+                                <span class="badge text-white fw-normal text-bg-primary text-capitalize">
+                                    {{ $buku->kategori->nama }}
+                                </span>
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
                         </p>
                     </div>
                     <div class="col-12">
-                        <h6>View</h6>
-                        <p class="mb-0">{{ $buku->view_count }}</p>
+                        <h6>Jumlah Dilihat</h6>
+                        <p class="mb-0">{{ $buku->view }}</p>
                     </div>
 
 

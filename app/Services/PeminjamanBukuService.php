@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Buku;
 use App\Models\Denda;
 use App\Models\PeminjamanBuku;
+use App\Models\Pengaturan;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -95,14 +96,16 @@ class PeminjamanBukuService
                 throw new \Exception('Anda sudah meminjam buku ini');
             }
 
+            $batasHari = (int) Pengaturan::getValue('batas_hari_pinjam', 3);
+
             $peminjaman = PeminjamanBuku::create([
-                'user_id' => $userId,
-                'buku_id' => $bukuId,
-                'tanggal_pinjam' => Carbon::now(),
-                'tanggal_kembali' => Carbon::now()->addDays(7),
-                'status' => 'dipinjam',
-                'approval' => 'approved',
-                'approval_by' => $userId
+                'user_id'       => $userId,
+                'buku_id'       => $bukuId,
+                'tanggal_pinjam'=> Carbon::now(),
+                'tanggal_kembali'=> Carbon::now()->addDays($batasHari),
+                'status'        => 'dipinjam',
+                'approval'      => 'approved',
+                'approval_by'   => null
             ]);
 
             if ($buku->jumlah > 0) {

@@ -111,6 +111,8 @@
                 <th>Nama Siswa</th>
                 <th>NIS</th>
                 <th>Judul Buku</th>
+                <th>Jenis Denda</th>
+                <th>Hari Terlambat</th>
                 <th>Jumlah Denda</th>
                 <th>Status</th>
                 <th>Tanggal Bayar</th>
@@ -124,6 +126,14 @@
                 <td>{{ $row->peminjaman->user->nama ?? '-' }}</td>
                 <td>{{ $row->peminjaman->user->nim_nip ?? '-' }}</td>
                 <td>{{ $row->peminjaman->buku->judul ?? '-' }}</td>
+                <td>
+                    @if(($row->jenis_denda ?? '') === 'kehilangan')
+                        <span class="badge badge-danger">Kehilangan</span>
+                    @else
+                        <span class="badge badge-warning">Keterlambatan</span>
+                    @endif
+                </td>
+                <td>{{ ($row->hari_terlambat ?? 0) > 0 ? $row->hari_terlambat.' hari' : '-' }}</td>
                 <td>Rp {{ number_format($row->jumlah, 0, ',', '.') }}</td>
                 <td>
                     @if($row->status === 'paid')

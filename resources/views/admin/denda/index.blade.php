@@ -44,10 +44,11 @@
                 <table class="table table-striped align-middle mb-0" style="width: 100%">
                     <thead>
                         <tr>
-                            
                             <th>Peminjaman</th>
                             <th>Siswa</th>
                             <th>Buku</th>
+                            <th>Jenis Denda</th>
+                            <th>Hari Terlambat</th>
                             <th>Jumlah</th>
                             <th>Status</th>
                             <th>Tanggal Bayar</th>
@@ -57,10 +58,23 @@
                     <tbody>
                         @foreach ($denda as $item)
                             <tr>
-                                
                                 <td>#{{ $item->peminjaman->id ?? '-' }}</td>
                                 <td>{{ $item->peminjaman->user->nama ?? '-' }}</td>
                                 <td>{{ $item->peminjaman->buku->judul ?? '-' }}</td>
+                                <td>
+                                    @if($item->jenis_denda === 'kehilangan')
+                                        <span class="badge bg-danger">Kehilangan</span>
+                                    @else
+                                        <span class="badge bg-warning text-dark">Keterlambatan</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if(($item->hari_terlambat ?? 0) > 0)
+                                        <span class="text-danger fw-semibold">{{ $item->hari_terlambat }} hari</span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
                                 <td>{{ $item->formatted_amount }}</td>
                                 <td>
                                     <span class="badge bg-{{ $item->status === 'paid' ? 'success' : 'warning' }}">

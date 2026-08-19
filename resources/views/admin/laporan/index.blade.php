@@ -26,25 +26,32 @@
                                 <label for="jenis_laporan" class="form-label">Jenis Laporan</label>
                                 <select class="form-select" id="jenis_laporan" name="jenis_laporan" required>
                                     <option value="">Pilih Jenis</option>
-                                    <option value="peminjaman">Peminjaman</option>
-                                    <option value="pengembalian">Pengembalian</option>
-                                    <option value="denda">Denda</option>
-                                    <option value="terlambat">Keterlambatan</option>
+                                    <optgroup label="Peminjaman">
+                                        <option value="peminjaman">Peminjaman</option>
+                                        <option value="pengembalian">Pengembalian</option>
+                                        <option value="terlambat">Keterlambatan</option>
+                                    </optgroup>
+                                    <optgroup label="Denda">
+                                        <option value="denda">Denda (+ Hari Terlambat)</option>
+                                    </optgroup>
+                                    <optgroup label="Master Data">
+                                        <option value="anggota">Laporan Anggota / Siswa</option>
+                                        <option value="buku">Laporan Data Buku</option>
+                                    </optgroup>
                                 </select>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-3" id="field-tanggal-awal">
                                 <label for="tanggal_awal" class="form-label">Tanggal Awal</label>
-                                <input type="date" class="form-control" id="tanggal_awal" name="tanggal_awal" required>
+                                <input type="date" class="form-control" id="tanggal_awal" name="tanggal_awal">
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-3" id="field-tanggal-akhir">
                                 <label for="tanggal_akhir" class="form-label">Tanggal Akhir</label>
-                                <input type="date" class="form-control" id="tanggal_akhir" name="tanggal_akhir" required>
+                                <input type="date" class="form-control" id="tanggal_akhir" name="tanggal_akhir">
                             </div>
                             <div class="col-md-2">
                                 <label for="format" class="form-label">Format</label>
                                 <select class="form-select" id="format" name="format" required>
                                     <option value="pdf">PDF</option>
-                                    <option value="excel">Excel</option>
                                 </select>
                             </div>
                             <div class="col-md-1 d-flex align-items-end">

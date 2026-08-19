@@ -85,6 +85,11 @@
                         <svg class="nav-icon">
                             <use xlink:href="/vendors/@coreui/icons/svg/free.svg#cil-file"></use>
                         </svg>Laporan</a></li>
+                <li class="nav-item"><a class="nav-link {{ Request::is('*pengaturan*') ? 'active' : '' }}"
+                        href="{{ route('admin.pengaturan') }}">
+                        <svg class="nav-icon">
+                            <use xlink:href="/vendors/@coreui/icons/svg/free.svg#cil-settings"></use>
+                        </svg>Pengaturan</a></li>
             @endif
             @if (auth()->user()->role === 'admin')
                 <li class="nav-group"><a class="nav-link nav-group-toggle" href="#">

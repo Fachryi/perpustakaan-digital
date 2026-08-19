@@ -8,6 +8,7 @@ use App\Http\Controllers\JenisController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PeminjamanBukuController;
+use App\Http\Controllers\PengaturanController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SiswaController;
 use App\Models\Buku;
@@ -262,55 +263,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         Route::get('/', [LaporanController::class, 'index'])->name('admin.laporan.index');
         Route::get('/buku', [LaporanController::class, 'bukuReport'])->name('admin.laporan.buku');
         Route::get('/siswa', [LaporanController::class, 'siswaReport'])->name('admin.laporan.siswa');
+        Route::get('/anggota', [LaporanController::class, 'anggotaReport'])->name('admin.laporan.anggota');
         Route::get('/download', [LaporanController::class, 'download'])->name('admin.laporan.download');
     });
+
+    Route::get('/pengaturan', [PengaturanController::class, 'index'])->name('admin.pengaturan');
+    Route::put('/pengaturan', [PengaturanController::class, 'update'])->name('admin.pengaturan.update');
 });
 
-// TEMPORARY IMPORT ROUTE
-Route::get('/import-db-secret-12345', function () {
-    $sqlFile = base_path('digilib_export.sql');
-    if (!file_exists($sqlFile)) return "File not found at: " . $sqlFile;
-
-    $sql = file_get_contents($sqlFile);
-    
-    try {
-        $db = \Illuminate\Support\Facades\DB::connection();
-        $db->statement("SET FOREIGN_KEY_CHECKS=0");
-        $db->statement("SET SESSION sql_mode=''");
-        
-        // Split SQL into individual statements
-        $lines = explode("\n", $sql);
-        $statement = '';
-        $count = 0;
-        $errors = [];
-        
-        foreach ($lines as $line) {
-            $line = trim($line);
-            // Skip comments and empty lines
-            if (empty($line) || strpos($line, '--') === 0 || strpos($line, '/*') === 0 || strpos($line, '*/') === 0) {
-                continue;
-            }
-            $statement .= $line . "\n";
-            // Statement ends with semicolon
-            if (substr($line, -1) === ';') {
-                try {
-                    $db->unprepared($statement);
-                    $count++;
-                } catch (\Exception $e) {
-                    $errors[] = substr($statement, 0, 60) . '... => ' . $e->getMessage();
-                }
-                $statement = '';
-            }
-        }
-        
-        $db->statement("SET FOREIGN_KEY_CHECKS=1");
-        
-        $msg = "Imported $count statements successfully.";
-        if (!empty($errors)) {
-            $msg .= "\n\nErrors (" . count($errors) . "):\n" . implode("\n", array_slice($errors, 0, 5));
-        }
-        return nl2br(htmlspecialchars($msg));
-    } catch (\Exception $e) {
-        return "Fatal Error: " . $e->getMessage();
-    }
-});

@@ -24,17 +24,18 @@
             <form action="/dashboard/buku" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="row g-3">
-                    <div class="col-12">
-                        <label class="form-label" for="judul">Judul</label>
+                    <div class="col-md-6">
+                        <label class="form-label" for="kode_buku">ID Buku</label>
+                        <input class="form-control bg-light" id="kode_buku" name="kode_buku"
+                            value="{{ $kodeBuku }}" readonly>
+                        <div class="form-text">ID buku digenerate otomatis oleh sistem.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="judul">Judul <span class="text-danger">*</span></label>
                         <input class="form-control" id="judul"
-                            placeholder="Judul Buku" name="judul">
+                            placeholder="Judul Buku" name="judul" value="{{ old('judul') }}">
                     </div>
 
-                    <div class="col-12">
-                        <label class="form-label" for="sinopsis">Sinopsis</label>
-                        <textarea class="form-control" id="sinopsis" name="sinopsis" rows="4"
-                            placeholder="Sinopsis"></textarea>
-                    </div>
                     <div class="col-12">
                         <label class="form-label" for="abstrak">Abstrak</label>
                         <textarea class="form-control" id="abstrak" name="abstrak" rows="4"
@@ -67,7 +68,7 @@
                             placeholder="2020">
                     </div>
                     @if (auth()->user()->role !== 'siswa')
-                        <div class="col-12">
+                        <div class="col-md-6">
                             <label class="form-label" id="jenis-label" for="jenis">Jenis Koleksi</label>
                             <select class="form-select" id="jenis" name="jenis_koleksi" aria-labelledby="jenis-label">
                                 @foreach ($daftarJenis as $jenis)
@@ -78,7 +79,7 @@
                     @endif
 
                      @if (auth()->user()->role !== 'siswa')
-                        <div class="col-12">
+                        <div class="col-md-6">
                             <label class="form-label" id="kelas-label" for="kelas">Kelas</label>
                             <select class="form-select" id="kelas" name="kelas" aria-labelledby="kelas-label">
                                 @foreach ($daftarKelas as $kelas)
@@ -87,6 +88,18 @@
                             </select>
                         </div>
                     @endif
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="kategori_id">Kategori Buku</label>
+                        <select class="form-select" id="kategori_id" name="kategori_id">
+                            <option value="">-- Pilih Kategori --</option>
+                            @foreach ($daftarKategori as $kat)
+                                <option value="{{ $kat->id }}" {{ old('kategori_id') == $kat->id ? 'selected' : '' }}>
+                                    {{ $kat->nama }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                     {{-- <div class="col-sm-6 col-12">
                         <label class="form-label" id="fakultas-label" for="fakultas">Fakultas</label>
                         <select class="form-select" id="fakultas" name="fakultas" aria-labelledby="fakultas-label">

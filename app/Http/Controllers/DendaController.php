@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Denda;
 use App\Models\PeminjamanBuku;
+use App\Models\Pengaturan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class DendaController extends Controller
@@ -34,21 +36,45 @@ class DendaController extends Controller
     public function create()
     {
         $peminjaman = PeminjamanBuku::with(['user', 'buku'])
+            ->where('status', 'dipinjam')
+            ->where('approval', 'approved')
             ->orderByDesc('created_at')
             ->get();
 
-        return view('admin.denda.create', compact('peminjaman'));
+        $dendaPerHari       = (int) Pengaturan::getValue('denda_per_hari', 1000);
+        $dendaKehilangan    = (int) Pengaturan::getValue('denda_kehilangan_default', 50000);
+
+        return view('admin.denda.create', compact('peminjaman', 'dendaPerHari', 'dendaKehilangan'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'peminjaman_buku_id' => 'required|exists:peminjaman_buku,id',
-            'jumlah' => 'required|numeric|min:0',
-            'status' => 'required|in:unpaid,paid',
-            'tanggal_bayar' => 'nullable|date',
-            'keterangan' => 'nullable|string|max:255',
+            'jenis_denda'        => 'required|in:keterlambatan,kehilangan',
+            'jumlah'             => 'required_if:jenis_denda,kehilangan|numeric|min:0|nullable',
+            'status'             => 'required|in:unpaid,paid',
+            'tanggal_bayar'      => 'nullable|date',
+            'keterangan'         => 'nullable|string|max:255',
         ]);
+
+        $peminjaman  = PeminjamanBuku::findOrFail($request->peminjaman_buku_id);
+        $jenisDenda  = $request->jenis_denda;
+        $hariTerlambat = 0;
+        $jumlah        = 0;
+
+        if ($jenisDenda === 'keterlambatan') {
+            // Hitung hari terlambat otomatis
+            $tanggalKembali = Carbon::parse($peminjaman->tanggal_kembali);
+            $hariTerlambat  = max(0, (int) $tanggalKembali->diffInDays(Carbon::now(), false));
+            // Jika belum terlambat, tetap bisa dikenakan dengan hari 0
+            $dendaPerHari   = (int) Pengaturan::getValue('denda_per_hari', 1000);
+            $jumlah         = $hariTerlambat * $dendaPerHari;
+        } else {
+            // Kehilangan: admin input manual
+            $jumlah        = (float) $request->jumlah;
+            $hariTerlambat = 0;
+        }
 
         if ($request->status === 'paid' && ! $request->tanggal_bayar) {
             $tanggalBayar = now()->format('Y-m-d');
@@ -58,10 +84,12 @@ class DendaController extends Controller
 
         Denda::create([
             'peminjaman_buku_id' => $request->peminjaman_buku_id,
-            'jumlah' => $request->jumlah,
-            'status' => $request->status,
-            'tanggal_bayar' => $tanggalBayar,
-            'keterangan' => $request->keterangan,
+            'jumlah'             => $jumlah,
+            'status'             => $request->status,
+            'tanggal_bayar'      => $tanggalBayar,
+            'keterangan'         => $request->keterangan,
+            'jenis_denda'        => $jenisDenda,
+            'hari_terlambat'     => $hariTerlambat,
         ]);
 
         return redirect()->route('admin.denda.index')

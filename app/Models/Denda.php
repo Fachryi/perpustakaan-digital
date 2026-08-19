@@ -18,6 +18,8 @@ class Denda extends Model
         'status',
         'tanggal_bayar',
         'keterangan',
+        'jenis_denda',
+        'hari_terlambat',
     ];
 
     protected $casts = [

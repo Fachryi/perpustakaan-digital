@@ -6,6 +6,7 @@ use App\Models\Buku;
 use App\Models\FileBuku;
 use App\Models\Jenis;
 use App\Models\Kelas;
+use App\Models\Kategori;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -34,17 +35,19 @@ class BukuController extends Controller
         $daftarBuku = $daftarBuku->paginate(25);
         $daftarJenis = Jenis::all();
         $daftarKelas = Kelas::all();
+        $daftarKategori = Kategori::all();
 
-        return view('buku.index', compact('daftarBuku', 'daftarJenis', 'daftarKelas'));
+        return view('buku.index', compact('daftarBuku', 'daftarJenis', 'daftarKelas', 'daftarKategori'));
     }
 
     public function show(Buku $buku)
     {
-        $buku = $buku->load('fileBuku');
+        $buku = $buku->load('fileBuku', 'kategori');
         $daftarJenis = Jenis::all();
         $daftarKelas = Kelas::all();
+        $daftarKategori = Kategori::all();
 
-        return view('buku.show', compact('buku', 'daftarJenis', 'daftarKelas'));
+        return view('buku.show', compact('buku', 'daftarJenis', 'daftarKelas', 'daftarKategori'));
     }
 
     public function create()
@@ -53,25 +56,35 @@ class BukuController extends Controller
             $query->where('role', 'guru')->orWhere('role', 'siswa');
         })->get();
         $daftarGuru = User::where('role', 'guru')->get();
-
         $daftarJenis = Jenis::all();
         $daftarKelas = Kelas::all();
+        $daftarKategori = Kategori::all();
 
-        return view('buku.create', compact('daftarGuru', 'users', 'daftarJenis', 'daftarKelas'));
+        // Generate kode buku baru
+        $lastBuku = Buku::whereNotNull('kode_buku')->orderByDesc('id')->first();
+        if ($lastBuku && $lastBuku->kode_buku) {
+            $lastNum = (int) substr($lastBuku->kode_buku, 3); // BK-0001 -> 1
+            $nextNum = $lastNum + 1;
+        } else {
+            $nextNum = 1;
+        }
+        $kodeBuku = 'BK-' . str_pad($nextNum, 4, '0', STR_PAD_LEFT);
+
+        return view('buku.create', compact('daftarGuru', 'users', 'daftarJenis', 'daftarKelas', 'daftarKategori', 'kodeBuku'));
     }
 
     public function store(Request $request)
     {
         $rules = [
-            'judul' => ['required', 'max:255'],
-            'sinopsis' => ['required'],
-            'jumlah' => ['required', 'numeric', 'min:0'],
-            'pengarang' => ['required'],
-            'penerbit' => ['required'],
-            'tahun_terbit' => ['required'],
-            'file' => ['nullable', 'file', 'mimes:pdf', 'max:20480'],
-            'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-            'abstrak' => ['nullable', 'string'],
+            'judul'       => ['required', 'max:255'],
+            'jumlah'      => ['required', 'numeric', 'min:0'],
+            'pengarang'   => ['required'],
+            'penerbit'    => ['required'],
+            'tahun_terbit'=> ['required'],
+            'file'        => ['nullable', 'file', 'mimes:pdf', 'max:20480'],
+            'foto'        => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'abstrak'     => ['nullable', 'string'],
+            'kategori_id' => ['nullable', 'exists:kategori,id'],
         ];
 
         if (auth()->user()->role == 'admin') {
@@ -95,18 +108,30 @@ class BukuController extends Controller
             $fotoPath = $request->file('foto')->store('foto_buku', 'public');
         }
 
+        // Auto-generate kode_buku jika belum ada
+        $lastBuku = Buku::whereNotNull('kode_buku')->orderByDesc('id')->first();
+        if ($lastBuku && $lastBuku->kode_buku) {
+            $lastNum = (int) substr($lastBuku->kode_buku, 3);
+            $nextNum = $lastNum + 1;
+        } else {
+            $nextNum = 1;
+        }
+        $kodeBuku = 'BK-' . str_pad($nextNum, 4, '0', STR_PAD_LEFT);
+
         $buku = Buku::create([
-            'judul' => $request->judul,
-            'sinopsis' => $request->sinopsis,
-            'jumlah' => $request->jumlah,
-            'pengarang' => $request->pengarang,
-            'penerbit' => $request->penerbit,
-            'tahun_terbit' => $request->tahun_terbit,
-            'jenis_id' => $request->jenis_koleksi ?? 1,
-            'kelas_id' => $request->kelas ?? 1,
-            'status' => $status ?? 'tersedia',
-            'foto' => $fotoPath,
-            'abstrak' => $request->abstrak,
+            'kode_buku'   => $kodeBuku,
+            'judul'       => $request->judul,
+            'sinopsis'    => $request->sinopsis,
+            'jumlah'      => $request->jumlah,
+            'pengarang'   => $request->pengarang,
+            'penerbit'    => $request->penerbit,
+            'tahun_terbit'=> $request->tahun_terbit,
+            'jenis_id'    => $request->jenis_koleksi ?? 1,
+            'kelas_id'    => $request->kelas ?? 1,
+            'kategori_id' => $request->kategori_id,
+            'status'      => $status ?? 'tersedia',
+            'foto'        => $fotoPath,
+            'abstrak'     => $request->abstrak,
         ]);
 
         if ($filePath) {
@@ -132,8 +157,9 @@ class BukuController extends Controller
         $daftarGuru = User::where('role', 'guru')->get();
         $daftarJenis = Jenis::all();
         $daftarKelas = Kelas::all();
+        $daftarKategori = Kategori::all();
 
-        return view('buku.edit', compact('buku', 'users', 'daftarGuru', 'daftarJenis', 'daftarKelas'));
+        return view('buku.edit', compact('buku', 'users', 'daftarGuru', 'daftarJenis', 'daftarKelas', 'daftarKategori'));
     }
 
     public function update(Request $request, Buku $buku)
@@ -164,15 +190,16 @@ class BukuController extends Controller
         }
 
         $buku->update([
-            'judul' => $request->judul,
-            'sinopsis' => $request->sinopsis,
-            'jumlah' => $request->jumlah,
-            'pengarang' => $request->pengarang,
-            'penerbit' => $request->penerbit,
-            'tahun_terbit' => $request->tahun_terbit,
-            'jenis_id' => $request->jenis_koleksi,
-            'kelas_id' => $request->kelas,
-            'abstrak' => $request->abstrak,
+            'judul'       => $request->judul,
+            'sinopsis'    => $request->sinopsis,
+            'jumlah'      => $request->jumlah,
+            'pengarang'   => $request->pengarang,
+            'penerbit'    => $request->penerbit,
+            'tahun_terbit'=> $request->tahun_terbit,
+            'jenis_id'    => $request->jenis_koleksi,
+            'kelas_id'    => $request->kelas,
+            'kategori_id' => $request->kategori_id,
+            'abstrak'     => $request->abstrak,
         ]);
 
         if ($request->hasFile('file')) {

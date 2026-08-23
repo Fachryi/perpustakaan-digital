@@ -110,7 +110,7 @@
                         </div>
                         <div class="d-flex gap-3">
                             <div class="flex-shrink-0">
-                                <img src="{{ $buku->foto ? Storage::url($buku->foto) : '/images/book-placeholder.png' }}" alt="{{ $buku->judul }}" class="rounded" style="width: 80px; height: 110px; object-fit: cover;">
+                                <img src="{{ $buku->foto_url }}" alt="{{ $buku->judul }}" class="rounded" style="width: 80px; height: 110px; object-fit: cover;">
                             </div>
                             <div>
                                 <a href="/buku/{{ $buku->id }}">

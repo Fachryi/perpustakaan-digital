@@ -138,7 +138,7 @@
                                     @if ($buku->file)
                                         <span data-coreui-toggle="tooltip" data-coreui-title="Unduh buku"><a
                                                 class="btn btn-link btn-sm link-body-emphasis"
-                                                href="{{ $buku->file && $buku->file->file_name ? Storage::url($buku->file->file_name) : '#' }}" target="_blank" download
+                                                href="{{ $buku->fileBuku ? $buku->fileBuku->file_url : '#' }}" target="_blank" download
                                                 aria-label="Unduh buku">
                                                 <svg class="icon icon-lg">
                                                     <use

@@ -32,7 +32,7 @@
 
             <div class="row g-4 mt-2">
                 <div class="col-md-4 col-lg-3">
-                    <img src="{{ $buku->foto ? Storage::url($buku->foto) : '/images/book-placeholder.png' }}" alt="{{ $buku->judul }}" class="img-fluid rounded-3 shadow" style="width: 100%; max-height: 360px; object-fit: cover;">
+                    <img src="{{ $buku->foto_url }}" alt="{{ $buku->judul }}" class="img-fluid rounded-3 shadow" style="width: 100%; max-height: 360px; object-fit: cover;">
                 </div>
                 <div class="col-md-8 col-lg-9 d-flex flex-column justify-content-between">
                     <div>
@@ -42,8 +42,8 @@
                             </div>
                             <div class="hstack gap-1">
                                 @if ($buku->fileBuku && !empty($buku->fileBuku->file_name))
-                                    <a href="{{ Storage::url($buku->fileBuku->file_name) }}" download class="btn btn-outline-dark btn-sm d-flex align-items-center gap-1">
-                                        <i class="bi-download"></i> Download Digital
+                                    <a href="{{ $buku->fileBuku->file_url }}" target="_blank" download class="btn btn-outline-dark btn-sm d-flex align-items-center gap-1">
+                                        <i class="bi-download"></i> Unduh / Baca Digital
                                     </a>
                                 @endif 
                             </div>

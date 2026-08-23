@@ -19,6 +19,17 @@ class Buku extends Model
         'view' => 'integer',
     ];
 
+    public function getFotoUrlAttribute(): string
+    {
+        if (empty($this->foto)) {
+            return '/images/book-placeholder.png';
+        }
+        if (str_starts_with($this->foto, 'http://') || str_starts_with($this->foto, 'https://')) {
+            return $this->foto;
+        }
+        return \Illuminate\Support\Facades\Storage::url($this->foto);
+    }
+
     // Relationship dengan User (author)
     public function user(): BelongsTo
     {

@@ -25,53 +25,36 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <h6>ID Buku</h6>
-                        <p class="mb-0"><span class="badge bg-secondary fs-6">{{ $buku->kode_buku ?? '-' }}</span></p>
+                        <img src="{{ $buku->foto_url }}" alt="Foto Buku" class="img-thumbnail" style="max-height: 200px;">
                     </div>
-                    <div class="col-md-6">
-                        <h6>Judul</h6>
-                        <p class="mb-0">{{ $buku->judul }}</p>
+                    <div class="col-8 align-self-center">
+                        <h5>{{ $buku->judul }}</h5>
+                        <p class="text-body-secondary">{{ $buku->sinopsis }}</p>
                     </div>
-                    <div class="col-12">
-                        <h6>Sinopsis</h6>
-                        <p class="mb-0">{{ $buku->sinopsis }}</p>
+                </div>
+                <div class="row border-top pt-3">
+                    <div class="col-4">
+                        <h6>Status</h6>
+                        @if ($buku->status == 'tersedia')
+                            <p><span class="badge text-bg-success">Tersedia</span></p>
+                        @elseif ($buku->status == 'dipinjam')
+                            <p><span class="badge text-bg-secondary">Dipinjam</span></p>
+                        @elseif ($buku->status == 'proses')
+                            <p><span class="badge text-bg-warning">Pengajuan</span></p>
+                        @elseif ($buku->status == 'ditolak')
+                            <p><span class="badge text-bg-danger">Pengajuan Ditolak</span></p>
+                        @endif
                     </div>
-                    <div class="col-12">
-                        <h6>Abstrak</h6>
-                        <p class="mb-0">{{ $buku->abstrak ?? '-' }}</p>
+                    <div class="col">
+                        <h6>Stok</h6>
+                        <p class="text-body-secondary">{{ $buku->jumlah }}</p>
                     </div>
-                    <div class="col-12">
-                        <h6>Foto Buku</h6>
-                        <img src="{{ $buku->foto ? Storage::url($buku->foto) : '/images/book-placeholder.png' }}" alt="Foto Buku" class="img-thumbnail" style="max-height: 200px;">
+                    <div class="col">
+                        <h6>Penulis</h6>
+                        <p class="text-body-secondary">{{ $buku->pengarang }}</p>
                     </div>
-                    <div class="col-12">
-                        <h6>Jumlah</h6>
-                        <p class="mb-0">{{ $buku->jumlah }}</p>
-                    </div>
-                    <div class="col-12">
-                        <h6>Pengarang</h6>
-                        <p class="mb-0">{{ $buku->pengarang }}</p>
-                    </div>
-                    <div class="col-12">
-                        <h6>Penerbit</h6>
-                        <p class="mb-0">{{ $buku->penerbit }}</p>
-                    </div>
-                    <div class="col-12">
+                    <div class="col">
                         <h6>Tahun Terbit</h6>
-                        <p class="mb-0">{{ $buku->tahun_terbit }}</p>
-                    </div>
-                    <div class="col-12">
-                        <h6>Jenis Buku</h6>
-                        <p class="mb-0">
-                            @if($buku->jenis)
-                                @php
-                                    $colors = ['danger','success','info','primary','warning'];
-                                    $color = $colors[($buku->jenis_id - 1) % count($colors)] ?? 'secondary';
-                                @endphp
-                                <span class="badge text-white fw-normal text-bg-{{ $color }} text-capitalize">
-                                    {{ $buku->jenis->nama }}
-                                </span>
-                            @else
-                                <span class="text-muted">-</span>
                             @endif
                         </p>
                     </div>

@@ -28,15 +28,12 @@ class AuthController extends Controller
             'nama' => 'required|string|max:255',
             'nim_nip' => 'required|string|max:50|unique:users,nim_nip',
             'kelas_id' => 'required',
-            'email' => 'nullable|email|unique:users,email',
             'password' => 'required|string|min:6|confirmed',
         ], [
             'nama.required' => 'Nama lengkap wajib diisi.',
             'nim_nip.required' => 'NIS / NIM wajib diisi.',
             'nim_nip.unique' => 'NIS / NIM sudah terdaftar.',
             'kelas_id.required' => 'Pilih kelas terlebih dahulu.',
-            'email.email' => 'Format email tidak valid.',
-            'email.unique' => 'Email sudah terdaftar.',
             'password.required' => 'Password wajib diisi.',
             'password.min' => 'Password minimal 6 karakter.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
@@ -48,7 +45,6 @@ class AuthController extends Controller
             'nama' => $request->nama,
             'nim_nip' => $request->nim_nip,
             'kelas_id' => $kelasId,
-            'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => 'siswa',
         ]);

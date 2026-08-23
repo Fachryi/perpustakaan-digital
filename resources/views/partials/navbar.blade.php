@@ -15,7 +15,15 @@
                         </li>
                         <li class="nav-item">
                            
-                            @auth
+                        @guest
+                            <li class="nav-item">
+                                <a class="nav-link" href="/">Masuk</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-info btn-sm text-white ms-2" href="{{ route('register') }}">Daftar Siswa</a>
+                            </li>
+                        @endguest
+                        @auth
                             @if(auth()->user()->role === 'siswa')
                                 @php
                                     $notifCount = \App\Models\PeminjamanBuku::where('user_id', auth()->id())

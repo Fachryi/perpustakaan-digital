@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BukuController;
 use App\Http\Controllers\DendaController;
 use App\Http\Controllers\GuruController;
@@ -74,7 +75,26 @@ Route::get('/search', SearchController::class)->middleware('auth');
 Route::get('/buku/{buku}', function (Buku $buku) {
     $buku->increment('view');
 
-    return view('buku-detail', compact('buku'));
+    $estimasiKembali = null;
+    if ($buku->jumlah <= 0 || $buku->status !== 'tersedia') {
+        $estimasiKembali = PeminjamanBuku::where('buku_id', $buku->id)
+            ->where('status', 'dipinjam')
+            ->where('approval', 'approved')
+            ->where('tanggal_kembali', '>=', now()->startOfDay())
+            ->orderBy('tanggal_kembali', 'asc')
+            ->first();
+    }
+
+    $peminjamanSaya = null;
+    if (auth()->check()) {
+        $peminjamanSaya = PeminjamanBuku::where('user_id', auth()->id())
+            ->where('buku_id', $buku->id)
+            ->where('status', 'dipinjam')
+            ->latest()
+            ->first();
+    }
+
+    return view('buku-detail', compact('buku', 'estimasiKembali', 'peminjamanSaya'));
 })->middleware('auth');
 
 Route::get('/', function () {
@@ -82,6 +102,9 @@ Route::get('/', function () {
 })
     ->name('login')
     ->middleware('guest');
+
+Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register')->middleware('guest');
+Route::post('/register', [AuthController::class, 'register'])->middleware('guest');
 
 Route::post('/login', function (Request $request) {
     if (Auth::attempt(['nim_nip' => $request->username, 'password' => $request->password])) {
@@ -240,6 +263,8 @@ Route::middleware(['auth'])->group(function () {
             // Admin only routes
             Route::middleware('role:admin')->group(function () {
                 Route::get('/', [PeminjamanBukuController::class, 'index'])->name('admin.peminjaman.index');
+                Route::patch('/{id}/approve', [PeminjamanBukuController::class, 'approve'])->name('admin.peminjaman.approve');
+                Route::patch('/{id}/reject', [PeminjamanBukuController::class, 'reject'])->name('admin.peminjaman.reject');
 
                 Route::get('/overdue/books', [PeminjamanBukuController::class, 'overdueBooks'])->name('overdue');
                 Route::get('/users/ajax', [PeminjamanBukuController::class, 'getUsersAjax'])->name('users.ajax');

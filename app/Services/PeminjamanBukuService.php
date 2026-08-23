@@ -81,6 +81,7 @@ class PeminjamanBukuService
             $unreturnedBook = PeminjamanBuku::with(['user', 'buku', 'denda'])
                 ->where('user_id', $userId)
                 ->where('status', 'dipinjam')
+                ->where('approval', 'approved')
                 ->first();
 
             if ($unreturnedBook) {
@@ -93,7 +94,12 @@ class PeminjamanBukuService
                 ->first();
 
             if ($existingBorrowing) {
-                throw new \Exception('Anda sudah meminjam buku ini');
+                if ($existingBorrowing->approval === 'pending') {
+                    throw new \Exception('Anda sudah mengajukan peminjaman buku ini. Harap menunggu validasi dari admin.');
+                }
+                if ($existingBorrowing->approval === 'approved') {
+                    throw new \Exception('Anda sedang meminjam buku ini.');
+                }
             }
 
             $batasHari = (int) Pengaturan::getValue('batas_hari_pinjam', 3);
@@ -104,16 +110,65 @@ class PeminjamanBukuService
                 'tanggal_pinjam'=> Carbon::now(),
                 'tanggal_kembali'=> Carbon::now()->addDays($batasHari),
                 'status'        => 'dipinjam',
-                'approval'      => 'approved',
+                'approval'      => 'pending',
                 'approval_by'   => null
             ]);
 
-            if ($buku->jumlah > 0) {
-                $buku->decrement('jumlah', 1);
-                if ($buku->jumlah <= 0) {
-                    $buku->update(['status' => 'habis']);
+            return $peminjaman;
+        });
+    }
+
+    public function approvePeminjaman($peminjamanId, $adminId)
+    {
+        return DB::transaction(function () use ($peminjamanId, $adminId) {
+            $peminjaman = PeminjamanBuku::with('buku')->findOrFail($peminjamanId);
+
+            if ($peminjaman->approval === 'approved') {
+                throw new \Exception('Peminjaman ini sudah disetujui sebelumnya.');
+            }
+
+            if (!$peminjaman->buku->isAvailable()) {
+                throw new \Exception('Stok buku habis atau tidak tersedia untuk dipinjam.');
+            }
+
+            $batasHari = (int) Pengaturan::getValue('batas_hari_pinjam', 3);
+
+            $peminjaman->update([
+                'approval' => 'approved',
+                'approval_by' => $adminId,
+                'tanggal_pinjam' => Carbon::now(),
+                'tanggal_kembali' => Carbon::now()->addDays($batasHari),
+            ]);
+
+            if ($peminjaman->buku->jumlah > 0) {
+                $peminjaman->buku->decrement('jumlah', 1);
+                if ($peminjaman->buku->jumlah <= 0) {
+                    $peminjaman->buku->update(['status' => 'habis']);
                 }
             }
+
+            return $peminjaman;
+        });
+    }
+
+    public function rejectPeminjaman($peminjamanId, $adminId)
+    {
+        return DB::transaction(function () use ($peminjamanId, $adminId) {
+            $peminjaman = PeminjamanBuku::with('buku')->findOrFail($peminjamanId);
+
+            if ($peminjaman->approval === 'approved') {
+                if ($peminjaman->status === 'dipinjam') {
+                    $peminjaman->buku->increment('jumlah', 1);
+                    if ($peminjaman->buku->status === 'habis') {
+                        $peminjaman->buku->update(['status' => 'tersedia']);
+                    }
+                }
+            }
+
+            $peminjaman->update([
+                'approval' => 'rejected',
+                'approval_by' => $adminId,
+            ]);
 
             return $peminjaman;
         });

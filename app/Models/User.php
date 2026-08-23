@@ -22,6 +22,7 @@ class User extends Authenticatable
         'kelas_id',
         'role',
         'nim_nip',
+        'email',
         'password',
     ];
 

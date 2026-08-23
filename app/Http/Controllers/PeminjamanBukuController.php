@@ -36,13 +36,43 @@ class PeminjamanBukuController extends Controller
         try {
             $this->peminjamanService->pinjamBuku(auth()->id(), $bukuId);
 
-            Alert::success('Berhasil', 'Buku berhasil dipinjam!');
+            Alert::success('Pengajuan Berhasil', 'Pengajuan peminjaman berhasil dikirim! Silakan tunggu validasi dari petugas/admin perpustakaan.');
 
             return redirect()->back();
         } catch (\Exception $e) {
             Alert::error('Gagal Meminjam', $e->getMessage());
 
             return redirect()->back();
+        }
+    }
+
+    public function approve($id)
+    {
+        try {
+            $this->peminjamanService->approvePeminjaman($id, auth()->id());
+
+            Alert::success('Disetujui', 'Pengajuan peminjaman berhasil disetujui!');
+
+            return redirect()->back()->with('success', 'Pengajuan peminjaman berhasil disetujui!');
+        } catch (\Exception $e) {
+            Alert::error('Gagal Menyutujui', $e->getMessage());
+
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function reject($id)
+    {
+        try {
+            $this->peminjamanService->rejectPeminjaman($id, auth()->id());
+
+            Alert::success('Ditolak', 'Pengajuan peminjaman telah ditolak.');
+
+            return redirect()->back()->with('success', 'Pengajuan peminjaman telah ditolak.');
+        } catch (\Exception $e) {
+            Alert::error('Gagal Menolak', $e->getMessage());
+
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 

@@ -32,6 +32,13 @@
                                 Dikembalikan</option>
                         </select>
 
+                        <select class="form-control-sm" id="approval" name="approval">
+                            <option value="" {{ request('approval') == '' ? 'selected' : '' }}>Semua Validasi</option>
+                            <option value="pending" {{ request('approval') == 'pending' ? 'selected' : '' }}>⏳ Menunggu Validasi</option>
+                            <option value="approved" {{ request('approval') == 'approved' ? 'selected' : '' }}>✓ Disetujui</option>
+                            <option value="rejected" {{ request('approval') == 'rejected' ? 'selected' : '' }}>✕ Ditolak</option>
+                        </select>
+
                         @if (auth()->user()->isAdmin())
                             <select class="form-control-sm" id="user_id" name="user_id">
                                 <option value="">Semua User</option>
@@ -60,41 +67,56 @@
                 <table class="table table-striped align-middle" style="width: 100%">
                     <thead>
                         <tr>
-                            
                             <th>Siswa</th>
                             <th>Buku</th>
                             <th>Tanggal Pinjam</th>
                             <th>Tanggal Kembali</th>
+                            <th>Validasi (Approval)</th>
                             <th>Denda</th>
-                            <th>Status</th>
-
+                            <th>Status Buku</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($peminjaman as $item)
-                            <tr class="{{ $item->isOverdue() ? 'table-danger' : '' }}">
-                                
+                            <tr class="{{ $item->isOverdue() && $item->approval === 'approved' ? 'table-danger' : ($item->approval === 'pending' ? 'table-warning' : '') }}">
                                 <td>
-                                    <div class="fw-bold">{{ $item->user->nama }}</div>
-                                    <small class="text-muted">{{ $item->user->email }}</small>
+                                    <div class="fw-bold">{{ $item->user->nama ?? '-' }}</div>
+                                    <small class="text-muted">{{ $item->user->nim_nip ?? '-' }} &bull; {{ $item->user->kelas?->nama ?? '' }}</small>
                                 </td>
                                 <td>
-                                    <div class="fw-bold">{{ $item->buku->judul }}</div>
-                                    <small class="text-muted">{{ $item->buku->penulis }}</small>
+                                    <div class="fw-bold">{{ $item->buku->judul ?? '-' }}</div>
+                                    <small class="text-muted">{{ $item->buku->kode_buku ?? '' }}</small>
                                 </td>
-                                <td>{{ $item->tanggal_pinjam->format('d/m/Y') }}</td>
+                                <td>{{ $item->tanggal_pinjam ? $item->tanggal_pinjam->format('d/m/Y') : '-' }}</td>
                                 <td>
                                     {{ $item->tanggal_kembali ? $item->tanggal_kembali->format('d/m/Y') : '-' }}
-                                    @if ($item->isOverdue())
+                                    @if ($item->isOverdue() && $item->approval === 'approved')
                                         <br><small class="text-danger">
                                             <i class="bi bi-exclamation-triangle"></i>
                                             Terlambat {{ abs($item->getDaysRemaining()) }} hari
                                         </small>
-                                    @elseif($item->status === 'dipinjam' && $item->tanggal_kembali)
+                                    @elseif($item->status === 'dipinjam' && $item->approval === 'approved' && $item->tanggal_kembali)
                                         <br><small class="text-info">
                                             {{ $item->getDaysRemaining() }} hari lagi
                                         </small>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if ($item->approval === 'pending')
+                                        <span class="badge bg-warning text-dark">
+                                            ⏳ Menunggu Validasi
+                                        </span>
+                                    @elseif ($item->approval === 'approved')
+                                        <span class="badge bg-success">
+                                            ✓ Disetujui
+                                        </span>
+                                    @elseif ($item->approval === 'rejected')
+                                        <span class="badge bg-danger">
+                                            ✕ Ditolak
+                                        </span>
+                                    @else
+                                        -
                                     @endif
                                 </td>
                                 <td>
@@ -111,11 +133,10 @@
                                         -
                                     @endif
                                 </td>
-                                
                                 <td>
                                     @php
                                         $statusLabel = $item->status === 'lunas' ? 'dikembalikan' : $item->status;
-                                        $badgeColor = $statusLabel === 'dipinjam' ? 'warning' : 'success';
+                                        $badgeColor = $statusLabel === 'dipinjam' ? 'info' : 'secondary';
                                     @endphp
                                     <span class="badge bg-{{ $badgeColor }}">
                                         {{ ucfirst($statusLabel) }}
@@ -123,7 +144,23 @@
                                 </td>
 
                                 <td>
-                                    <div class="btn-group" role="group">
+                                    <div class="d-flex align-items-center gap-1 flex-wrap">
+                                        @if ($item->approval === 'pending')
+                                            <form action="{{ route('admin.peminjaman.approve', $item->id) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="btn btn-sm btn-success text-white fw-bold px-2 py-1" title="Setujui Peminjaman" onclick="return confirm('Setujui peminjaman buku ini?')">
+                                                    ✓ Setujui
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('admin.peminjaman.reject', $item->id) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="btn btn-sm btn-outline-danger px-2 py-1" title="Tolak Peminjaman" onclick="return confirm('Tolak peminjaman buku ini?')">
+                                                    ✕ Tolak
+                                                </button>
+                                            </form>
+                                        @endif
                                         <span data-coreui-toggle="tooltip" data-coreui-title="Hapus">
                                             <btn class="btn btn-link btn-sm link-danger" aria-label="Hapus"
                                                 data-coreui-toggle="modal"

@@ -18,7 +18,13 @@ class BukuController extends Controller
     {
         $daftarBuku = Buku::with('user', 'fileBuku')->orderBy('updated_at', 'desc');
         if ($request->search) {
-            $daftarBuku->where('judul', 'LIKE', "%{$request->search}%");
+            $search = $request->search;
+            $daftarBuku->where(function ($q) use ($search) {
+                $q->where('judul', 'LIKE', "%{$search}%")
+                  ->orWhere('kode_buku', 'LIKE', "%{$search}%")
+                  ->orWhere('pengarang', 'LIKE', "%{$search}%")
+                  ->orWhere('penerbit', 'LIKE', "%{$search}%");
+            });
         }
 
         if ($request->jenis_id) {

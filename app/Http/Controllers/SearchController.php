@@ -17,8 +17,17 @@ class SearchController extends Controller
         //$start = microtime(true);
         $jenis = Jenis::all();
         $kelass = Kelas::all();
-       
-        $bukus = Buku::where('judul', 'like', '%'.$request->term.'%');
+        $bukus = Buku::query();
+
+        if ($request->term) {
+            $term = $request->term;
+            $bukus->where(function ($q) use ($term) {
+                $q->where('judul', 'like', '%' . $term . '%')
+                  ->orWhere('kode_buku', 'like', '%' . $term . '%')
+                  ->orWhere('pengarang', 'like', '%' . $term . '%')
+                  ->orWhere('penerbit', 'like', '%' . $term . '%');
+            });
+        }
 
         if ($request->jenis) {
             $bukus->whereIn('jenis_id', $request->jenis);

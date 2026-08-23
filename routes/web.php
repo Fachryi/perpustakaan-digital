@@ -296,16 +296,5 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::put('/pengaturan', [PengaturanController::class, 'update'])->name('admin.pengaturan.update');
 });
 
-// TEMPORARY IMPORT ROUTE FOR RAILWAY MIGRATION
-Route::get('/import-local-data-secret-999', function () {
-    $sqlFile = base_path('digilib_local.sql');
-    if (!file_exists($sqlFile)) return "File dump not found!";
 
-    try {
-        \Illuminate\Support\Facades\DB::unprepared(file_get_contents($sqlFile));
-        return "<h1>BERHASIL! 🎉</h1><p>Semua data lokal (119 buku, siswa, denda, kelas, peminjaman) telah sukses di-import ke database Railway!</p>";
-    } catch (\Exception $e) {
-        return "Error: " . $e->getMessage();
-    }
-});
 

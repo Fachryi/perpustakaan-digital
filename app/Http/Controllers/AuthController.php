@@ -24,34 +24,50 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $request->validate([
-            'nama' => 'required|string|max:255',
-            'nim_nip' => 'required|string|max:50|unique:users,nim_nip',
-            'kelas_id' => 'required',
-            'password' => 'required|string|min:6|confirmed',
-        ], [
-            'nama.required' => 'Nama lengkap wajib diisi.',
-            'nim_nip.required' => 'NIS / NIM wajib diisi.',
-            'nim_nip.unique' => 'NIS / NIM sudah terdaftar.',
-            'kelas_id.required' => 'Pilih kelas terlebih dahulu.',
-            'password.required' => 'Password wajib diisi.',
-            'password.min' => 'Password minimal 6 karakter.',
-            'password.confirmed' => 'Konfirmasi password tidak cocok.',
-        ]);
+        $role = $request->role; // 'siswa' atau 'guru'
 
-        $kelasId = Kelas::resolveOrCreateIdFromName($request->kelas_id);
+        $rules = [
+            'role'     => 'required|in:siswa,guru',
+            'nama'     => 'required|string|max:255',
+            'nim_nip'  => 'required|string|max:50|unique:users,nim_nip',
+            'password' => 'required|string|min:6|confirmed',
+        ];
+
+        $messages = [
+            'role.required'      => 'Pilih jenis pendaftar terlebih dahulu.',
+            'nama.required'      => 'Nama lengkap wajib diisi.',
+            'nim_nip.required'   => $role === 'guru' ? 'NIP wajib diisi.' : 'NIS wajib diisi.',
+            'nim_nip.unique'     => $role === 'guru' ? 'NIP sudah terdaftar.' : 'NIS sudah terdaftar.',
+            'password.required'  => 'Password wajib diisi.',
+            'password.min'       => 'Password minimal 6 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+        ];
+
+        // Siswa wajib pilih kelas
+        if ($role === 'siswa') {
+            $rules['kelas_id'] = 'required';
+            $messages['kelas_id.required'] = 'Pilih kelas terlebih dahulu.';
+        }
+
+        $request->validate($rules, $messages);
+
+        $kelasId = null;
+        if ($role === 'siswa') {
+            $kelasId = Kelas::resolveOrCreateIdFromName($request->kelas_id);
+        }
 
         $user = User::create([
-            'nama' => $request->nama,
-            'nim_nip' => $request->nim_nip,
+            'nama'     => $request->nama,
+            'nim_nip'  => $request->nim_nip,
             'kelas_id' => $kelasId,
             'password' => Hash::make($request->password),
-            'role' => 'siswa',
+            'role'     => $role,
         ]);
 
         Auth::login($user);
 
-        Alert::success('Berhasil Registrasi', 'Selamat datang, ' . $user->nama . '! Akun siswa Anda berhasil dibuat.');
+        $label = $role === 'guru' ? 'Guru' : 'Siswa';
+        Alert::success('Berhasil Registrasi', "Selamat datang, {$user->nama}! Akun {$label} Anda berhasil dibuat.");
 
         return redirect('/welcome');
     }

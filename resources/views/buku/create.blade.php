@@ -25,16 +25,11 @@
                 @csrf
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label" for="kode_buku">ID Buku</label>
-                        <input class="form-control bg-light" id="kode_buku" name="kode_buku"
-                            value="{{ $kodeBuku }}" readonly>
-                        <div class="form-text">ID buku digenerate otomatis oleh sistem.</div>
-                    </div>
-                    <div class="col-md-6">
                         <label class="form-label" for="judul">Judul <span class="text-danger">*</span></label>
                         <input class="form-control" id="judul"
                             placeholder="Judul Buku" name="judul" value="{{ old('judul') }}">
                     </div>
+
 
                     <div class="col-12">
                         <label class="form-label" for="abstrak">Abstrak</label>
@@ -90,15 +85,26 @@
                     @endif
 
                     <div class="col-md-6">
-                        <label class="form-label" for="kategori_id">Kategori Buku</label>
-                        <select class="form-select" id="kategori_id" name="kategori_id">
+                        <label class="form-label" for="kategori_id">Kategori Buku <span class="text-danger">*</span></label>
+                        <select class="form-select" id="kategori_id" name="kategori_id" required>
                             <option value="">-- Pilih Kategori --</option>
                             @foreach ($daftarKategori as $kat)
-                                <option value="{{ $kat->id }}" {{ old('kategori_id') == $kat->id ? 'selected' : '' }}>
+                                <option value="{{ $kat->id }}"
+                                    data-prefix="{{ $kat->nama == 'Mapel' ? '001' : ($kat->nama == 'Cerita' ? '002' : '003') }}"
+                                    {{ old('kategori_id') == $kat->id ? 'selected' : '' }}>
                                     {{ $kat->nama }}
                                 </option>
                             @endforeach
                         </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="kode_buku">ID Buku <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text fw-bold" id="kode-prefix">---</span>
+                            <input class="form-control" id="kode_buku" name="kode_buku"
+                                placeholder="Contoh: 001-001" value="{{ old('kode_buku') }}" required maxlength="20">
+                        </div>
+                        <div class="form-text">Prefix otomatis sesuai kategori. Isi nomor urut setelah prefix. Contoh: <code>001-001</code></div>
                     </div>
                     {{-- <div class="col-sm-6 col-12">
                         <label class="form-label" id="fakultas-label" for="fakultas">Fakultas</label>
@@ -139,6 +145,7 @@
 @section('script')
     <script>
         $(document).ready(function() {
+            // Auto-preview foto
             $('#foto').on('change', function() {
                 var file = this.files[0];
                 if (file) {
@@ -149,6 +156,28 @@
                     reader.readAsDataURL(file);
                 }
             });
-        })
+
+            // Auto-update prefix ID buku berdasarkan kategori
+            function updatePrefix() {
+                var selected = $('#kategori_id option:selected');
+                var prefix = selected.data('prefix') || '---';
+                $('#kode-prefix').text(prefix);
+                // Jika field kode_buku kosong atau belum diisi angka, isi prefix secara otomatis
+                var currentVal = $('#kode_buku').val();
+                if (!currentVal || currentVal.startsWith('00')) {
+                    if (prefix !== '---') {
+                        // Hanya ubah prefix, pertahankan nomor urut kalau ada
+                        var parts = currentVal.split('-');
+                        var nomor = parts.length > 1 ? parts.slice(1).join('-') : '';
+                        $('#kode_buku').val(prefix + (nomor ? '-' + nomor : ''));
+                    }
+                }
+            }
+
+            $('#kategori_id').on('change', updatePrefix);
+            // Jalankan saat pertama load (jika ada old value)
+            updatePrefix();
+        });
     </script>
 @endsection
+

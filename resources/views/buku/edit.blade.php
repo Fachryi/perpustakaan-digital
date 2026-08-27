@@ -26,10 +26,19 @@
                 @method('PUT')
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label" for="kode_buku">ID Buku</label>
-                        <input class="form-control bg-light" id="kode_buku" name="kode_buku"
-                            value="{{ $buku->kode_buku ?? 'Belum digenerate' }}" readonly>
-                        <div class="form-text">ID buku digenerate otomatis oleh sistem.</div>
+                        <label class="form-label" for="kode_buku">ID Buku <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text fw-bold" id="kode-prefix">
+                                @if($buku->kategori)
+                                    {{ $buku->kategori->nama == 'Mapel' ? '001' : ($buku->kategori->nama == 'Cerita' ? '002' : '003') }}
+                                @else
+                                    ---
+                                @endif
+                            </span>
+                            <input class="form-control" id="kode_buku" name="kode_buku"
+                                value="{{ $buku->kode_buku ?? '' }}" required maxlength="20">
+                        </div>
+                        <div class="form-text">Format: <code>001-001</code> (prefix-nomorurut)</div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label" for="judul">Judul <span class="text-danger">*</span></label>

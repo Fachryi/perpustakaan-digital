@@ -64,24 +64,15 @@ class BukuController extends Controller
         $daftarGuru = User::where('role', 'guru')->get();
         $daftarJenis = Jenis::all();
         $daftarKelas = Kelas::all();
-        $daftarKategori = Kategori::all();
+        $daftarKategori = Kategori::orderBy('nama')->get();
 
-        // Generate kode buku baru
-        $lastBuku = Buku::whereNotNull('kode_buku')->orderByDesc('id')->first();
-        if ($lastBuku && $lastBuku->kode_buku) {
-            $lastNum = (int) substr($lastBuku->kode_buku, 3); // BK-0001 -> 1
-            $nextNum = $lastNum + 1;
-        } else {
-            $nextNum = 1;
-        }
-        $kodeBuku = 'BK-' . str_pad($nextNum, 4, '0', STR_PAD_LEFT);
-
-        return view('buku.create', compact('daftarGuru', 'users', 'daftarJenis', 'daftarKelas', 'daftarKategori', 'kodeBuku'));
+        return view('buku.create', compact('daftarGuru', 'users', 'daftarJenis', 'daftarKelas', 'daftarKategori'));
     }
 
     public function store(Request $request)
     {
         $rules = [
+            'kode_buku'   => ['required', 'unique:buku,kode_buku', 'max:20'],
             'judul'       => ['required', 'max:255'],
             'jumlah'      => ['required', 'numeric', 'min:0'],
             'pengarang'   => ['required'],
@@ -114,18 +105,8 @@ class BukuController extends Controller
             $fotoPath = $request->file('foto')->store('foto_buku', 'public');
         }
 
-        // Auto-generate kode_buku jika belum ada
-        $lastBuku = Buku::whereNotNull('kode_buku')->orderByDesc('id')->first();
-        if ($lastBuku && $lastBuku->kode_buku) {
-            $lastNum = (int) substr($lastBuku->kode_buku, 3);
-            $nextNum = $lastNum + 1;
-        } else {
-            $nextNum = 1;
-        }
-        $kodeBuku = 'BK-' . str_pad($nextNum, 4, '0', STR_PAD_LEFT);
-
         $buku = Buku::create([
-            'kode_buku'   => $kodeBuku,
+            'kode_buku'   => strtoupper(trim($request->kode_buku)),
             'judul'       => $request->judul,
             'sinopsis'    => $request->sinopsis,
             'jumlah'      => $request->jumlah,
@@ -171,16 +152,18 @@ class BukuController extends Controller
     public function update(Request $request, Buku $buku)
     {
         $rules = [
-            'judul' => ['required', 'max:255'],
-            'sinopsis' => ['required'],
-            'jumlah' => ['required', 'numeric', 'min:0'],
-            'pengarang' => ['required'],
-            'penerbit' => ['required'],
+            'kode_buku'    => ['required', 'max:20', 'unique:buku,kode_buku,'.$buku->id],
+            'judul'        => ['required', 'max:255'],
+            'sinopsis'     => ['nullable'],
+            'jumlah'       => ['required', 'numeric', 'min:0'],
+            'pengarang'    => ['required'],
+            'penerbit'     => ['required'],
             'tahun_terbit' => ['required'],
-            'jenis_koleksi' => ['required'],
-            'kelas' => ['required'],
-            'file' => ['nullable', 'file', 'mimes:pdf', 'max:20480'],
-            'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'jenis_koleksi'=> ['required'],
+            'kelas'        => ['required'],
+            'file'         => ['nullable', 'file', 'mimes:pdf', 'max:20480'],
+            'foto'         => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'kategori_id'  => ['nullable', 'exists:kategori,id'],
         ];
 
         if (auth()->user()->role == 'admin') {
@@ -196,6 +179,7 @@ class BukuController extends Controller
         }
 
         $buku->update([
+            'kode_buku'   => strtoupper(trim($request->kode_buku)),
             'judul'       => $request->judul,
             'sinopsis'    => $request->sinopsis,
             'jumlah'      => $request->jumlah,

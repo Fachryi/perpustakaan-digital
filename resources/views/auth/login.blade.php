@@ -286,7 +286,7 @@
                 </form>
 
                 <div class="text-center mt-3" style="font-size: 0.83rem; color: rgba(255,255,255,0.75);">
-                    Belum punya akun? <a href="{{ route('register') }}" style="color: #60a5fa; font-weight: 600; text-decoration: none;">Daftar Siswa Baru</a>
+                    Belum punya akun? <a href="{{ route('register') }}" style="color: #60a5fa; font-weight: 600; text-decoration: none;">Mendaftar</a>
                 </div>
 
                 <div class="login-footer">

@@ -72,7 +72,7 @@ class BukuController extends Controller
     public function store(Request $request)
     {
         $rules = [
-            'kode_buku'   => ['required', 'unique:buku,kode_buku', 'max:20'],
+            'kode_buku'   => ['required', 'max:10'],
             'judul'       => ['required', 'max:255'],
             'jumlah'      => ['required', 'numeric', 'min:0'],
             'pengarang'   => ['required'],
@@ -152,7 +152,7 @@ class BukuController extends Controller
     public function update(Request $request, Buku $buku)
     {
         $rules = [
-            'kode_buku'    => ['required', 'max:20', 'unique:buku,kode_buku,'.$buku->id],
+            'kode_buku'    => ['required', 'max:10'],
             'judul'        => ['required', 'max:255'],
             'sinopsis'     => ['nullable'],
             'jumlah'       => ['required', 'numeric', 'min:0'],

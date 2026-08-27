@@ -98,13 +98,14 @@
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label" for="kode_buku">ID Buku <span class="text-danger">*</span></label>
+                        <label class="form-label">ID Buku</label>
                         <div class="input-group">
                             <span class="input-group-text fw-bold" id="kode-prefix">---</span>
-                            <input class="form-control" id="kode_buku" name="kode_buku"
-                                placeholder="Contoh: 001-001" value="{{ old('kode_buku') }}" required maxlength="20">
+                            <input class="form-control bg-light" id="kode_buku_display" readonly
+                                placeholder="Otomatis dari kategori">
                         </div>
-                        <div class="form-text">Prefix otomatis sesuai kategori. Isi nomor urut setelah prefix. Contoh: <code>001-001</code></div>
+                        <input type="hidden" name="kode_buku" id="kode_buku" value="{{ old('kode_buku') }}">
+                        <div class="form-text">ID diisi otomatis berdasarkan kategori yang dipilih.</div>
                     </div>
                     {{-- <div class="col-sm-6 col-12">
                         <label class="form-label" id="fakultas-label" for="fakultas">Fakultas</label>
@@ -157,27 +158,27 @@
                 }
             });
 
-            // Auto-update prefix ID buku berdasarkan kategori
-            function updatePrefix() {
+            // Auto-set ID buku berdasarkan kategori
+            function updateKodeBuku() {
                 var selected = $('#kategori_id option:selected');
-                var prefix = selected.data('prefix') || '---';
-                $('#kode-prefix').text(prefix);
-                // Jika field kode_buku kosong atau belum diisi angka, isi prefix secara otomatis
-                var currentVal = $('#kode_buku').val();
-                if (!currentVal || currentVal.startsWith('00')) {
-                    if (prefix !== '---') {
-                        // Hanya ubah prefix, pertahankan nomor urut kalau ada
-                        var parts = currentVal.split('-');
-                        var nomor = parts.length > 1 ? parts.slice(1).join('-') : '';
-                        $('#kode_buku').val(prefix + (nomor ? '-' + nomor : ''));
-                    }
+                var prefix = selected.data('prefix') || '';
+                var namaKat = selected.text().trim();
+
+                if (prefix) {
+                    $('#kode-prefix').text(prefix);
+                    $('#kode_buku_display').val(prefix + ' — ' + namaKat);
+                    $('#kode_buku').val(prefix); // hidden field yang dikirim ke server
+                } else {
+                    $('#kode-prefix').text('---');
+                    $('#kode_buku_display').val('');
+                    $('#kode_buku').val('');
                 }
             }
 
-            $('#kategori_id').on('change', updatePrefix);
-            // Jalankan saat pertama load (jika ada old value)
-            updatePrefix();
+            $('#kategori_id').on('change', updateKodeBuku);
+            updateKodeBuku(); // Jalankan saat pertama load
         });
     </script>
 @endsection
+
 

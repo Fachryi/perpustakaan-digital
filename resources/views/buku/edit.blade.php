@@ -26,7 +26,7 @@
                 @method('PUT')
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label" for="kode_buku">ID Buku <span class="text-danger">*</span></label>
+                        <label class="form-label">ID Buku</label>
                         <div class="input-group">
                             <span class="input-group-text fw-bold" id="kode-prefix">
                                 @if($buku->kategori)
@@ -35,10 +35,11 @@
                                     ---
                                 @endif
                             </span>
-                            <input class="form-control" id="kode_buku" name="kode_buku"
-                                value="{{ $buku->kode_buku ?? '' }}" required maxlength="20">
+                            <input class="form-control bg-light" id="kode_buku_display" readonly
+                                value="@if($buku->kategori){{ $buku->kode_buku }} — {{ $buku->kategori->nama }}@else{{ $buku->kode_buku ?? '' }}@endif">
                         </div>
-                        <div class="form-text">Format: <code>001-001</code> (prefix-nomorurut)</div>
+                        <input type="hidden" name="kode_buku" id="kode_buku" value="{{ $buku->kode_buku ?? '' }}">
+                        <div class="form-text">ID diisi otomatis berdasarkan kategori.</div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label" for="judul">Judul <span class="text-danger">*</span></label>
@@ -110,7 +111,9 @@
                         <select class="form-select" id="kategori_id" name="kategori_id">
                             <option value="">-- Pilih Kategori --</option>
                             @foreach ($daftarKategori as $kat)
-                                <option value="{{ $kat->id }}" @selected($kat->id == $buku->kategori_id)>
+                                <option value="{{ $kat->id }}"
+                                    data-prefix="{{ $kat->nama == 'Mapel' ? '001' : ($kat->nama == 'Cerita' ? '002' : '003') }}"
+                                    @selected($kat->id == $buku->kategori_id)>
                                     {{ $kat->nama }}
                                 </option>
                             @endforeach
@@ -141,6 +144,7 @@
 @section('script')
     <script>
         $(document).ready(function() {
+            // Auto-preview foto
             $('#foto').on('change', function() {
                 var file = this.files[0];
                 if (file) {
@@ -151,6 +155,25 @@
                     reader.readAsDataURL(file);
                 }
             });
-        })
+
+            // Auto-update ID buku saat kategori berubah
+            function updateKodeBuku() {
+                var selected = $('#kategori_id option:selected');
+                var prefix = selected.data('prefix') || '';
+                var namaKat = selected.text().trim();
+
+                if (prefix) {
+                    $('#kode-prefix').text(prefix);
+                    $('#kode_buku_display').val(prefix + ' — ' + namaKat);
+                    $('#kode_buku').val(prefix);
+                } else {
+                    $('#kode-prefix').text('---');
+                    $('#kode_buku_display').val('');
+                    $('#kode_buku').val('');
+                }
+            }
+
+            $('#kategori_id').on('change', updateKodeBuku);
+        });
     </script>
 @endsection

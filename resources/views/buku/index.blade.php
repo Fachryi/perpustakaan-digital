@@ -46,10 +46,12 @@
             <table class="table table-striped align-middle" style="width: 100%">
                 <thead>
                     <tr>
+                        <th>ID</th>
                         <th data-priority="1">Judul</th>  
                         <th>Jumlah</th>
                         <th>Pengarang</th>
                         <th>Tahun Terbit</th>
+                        <th>Kategori</th>
                         <th data-priority="3">Jenis</th>
                         @if (auth()->user()->role == 'admin')
                             <th>Status</th>
@@ -60,12 +62,36 @@
                 <tbody>
                     @foreach ($daftarBuku as $buku)
                         <tr>
+                            <td>
+                                <span class="badge fw-bold
+                                    @if($buku->kategori?->nama == 'Mapel') text-bg-primary
+                                    @elseif($buku->kategori?->nama == 'Cerita') text-bg-warning
+                                    @elseif($buku->kategori?->nama == 'Novel') text-bg-success
+                                    @else text-bg-secondary @endif">
+                                    {{ $buku->kode_buku ?? '-' }}
+                                </span>
+                            </td>
                             <td>{{ $buku->judul }}</td>
                             
                             <td>{{ $buku->jumlah }}</td>
                             <td>{{ $buku->pengarang }}</td>
                             
                             <td>{{ $buku->tahun_terbit }}</td>
+                            <td>
+                                @if($buku->kategori)
+                                    @php
+                                        $katColor = match($buku->kategori->nama) {
+                                            'Mapel'  => 'primary',
+                                            'Cerita' => 'warning',
+                                            'Novel'  => 'success',
+                                            default  => 'secondary',
+                                        };
+                                    @endphp
+                                    <span class="badge text-bg-{{ $katColor }}">{{ $buku->kategori->nama }}</span>
+                                @else
+                                    <span class="text-muted small">-</span>
+                                @endif
+                            </td>
                             <td>
                                 @if ($buku->jenis_id == 1)
                                     <span class="badge text-white fw-normal text-bg-danger text-capitalize">

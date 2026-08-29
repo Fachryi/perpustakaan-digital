@@ -36,10 +36,9 @@
                                 @endif
                             </span>
                             <input class="form-control bg-light" id="kode_buku_display" readonly
-                                value="@if($buku->kategori){{ $buku->kode_buku }} — {{ $buku->kategori->nama }}@else{{ $buku->kode_buku ?? '' }}@endif">
+                                value="{{ $buku->kode_buku ?? '' }}">
                         </div>
-                        <input type="hidden" name="kode_buku" id="kode_buku" value="{{ $buku->kode_buku ?? '' }}">
-                        <div class="form-text">ID diisi otomatis berdasarkan kategori.</div>
+                        <div class="form-text">Jika kategori diubah, ID akan diperbarui otomatis sesuai kategori baru.</div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label" for="judul">Judul <span class="text-danger">*</span></label>
@@ -156,20 +155,26 @@
                 }
             });
 
+            var originalKodeBuku = "{{ $buku->kode_buku ?? '' }}";
+            var originalKatId = "{{ $buku->kategori_id ?? '' }}";
+
             // Auto-update ID buku saat kategori berubah
             function updateKodeBuku() {
                 var selected = $('#kategori_id option:selected');
                 var prefix = selected.data('prefix') || '';
                 var namaKat = selected.text().trim();
+                var currentKatId = $('#kategori_id').val();
 
                 if (prefix) {
                     $('#kode-prefix').text(prefix);
-                    $('#kode_buku_display').val(prefix + ' — ' + namaKat);
-                    $('#kode_buku').val(prefix);
+                    if (currentKatId == originalKatId) {
+                        $('#kode_buku_display').val(originalKodeBuku);
+                    } else {
+                        $('#kode_buku_display').val(prefix + '-XX (Auto-generate saat disimpan)');
+                    }
                 } else {
                     $('#kode-prefix').text('---');
                     $('#kode_buku_display').val('');
-                    $('#kode_buku').val('');
                 }
             }
 
@@ -177,3 +182,4 @@
         });
     </script>
 @endsection
+

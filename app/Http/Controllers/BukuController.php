@@ -72,7 +72,6 @@ class BukuController extends Controller
     public function store(Request $request)
     {
         $rules = [
-            'kode_buku'   => ['required', 'max:10'],
             'judul'       => ['required', 'max:255'],
             'jumlah'      => ['required', 'numeric', 'min:0'],
             'pengarang'   => ['required'],
@@ -81,7 +80,7 @@ class BukuController extends Controller
             'file'        => ['nullable', 'file', 'mimes:pdf', 'max:20480'],
             'foto'        => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'abstrak'     => ['nullable', 'string'],
-            'kategori_id' => ['nullable', 'exists:kategori,id'],
+            'kategori_id' => ['required', 'exists:kategori,id'],
         ];
 
         if (auth()->user()->role == 'admin') {
@@ -105,8 +104,10 @@ class BukuController extends Controller
             $fotoPath = $request->file('foto')->store('foto_buku', 'public');
         }
 
+        $kodeBuku = Buku::generateKodeBuku($request->kategori_id);
+
         $buku = Buku::create([
-            'kode_buku'   => strtoupper(trim($request->kode_buku)),
+            'kode_buku'   => $kodeBuku,
             'judul'       => $request->judul,
             'sinopsis'    => $request->sinopsis,
             'jumlah'      => $request->jumlah,
@@ -152,7 +153,6 @@ class BukuController extends Controller
     public function update(Request $request, Buku $buku)
     {
         $rules = [
-            'kode_buku'    => ['required', 'max:10'],
             'judul'        => ['required', 'max:255'],
             'sinopsis'     => ['nullable'],
             'jumlah'       => ['required', 'numeric', 'min:0'],
@@ -163,7 +163,7 @@ class BukuController extends Controller
             'kelas'        => ['required'],
             'file'         => ['nullable', 'file', 'mimes:pdf', 'max:20480'],
             'foto'         => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-            'kategori_id'  => ['nullable', 'exists:kategori,id'],
+            'kategori_id'  => ['required', 'exists:kategori,id'],
         ];
 
         if (auth()->user()->role == 'admin') {
@@ -178,8 +178,13 @@ class BukuController extends Controller
             Storage::disk('public')->makeDirectory('foto_buku');
         }
 
+        $kodeBuku = $buku->kode_buku;
+        if ($buku->kategori_id != $request->kategori_id || empty($kodeBuku) || !str_contains($kodeBuku, '-')) {
+            $kodeBuku = Buku::generateKodeBuku($request->kategori_id);
+        }
+
         $buku->update([
-            'kode_buku'   => strtoupper(trim($request->kode_buku)),
+            'kode_buku'   => $kodeBuku,
             'judul'       => $request->judul,
             'sinopsis'    => $request->sinopsis,
             'jumlah'      => $request->jumlah,

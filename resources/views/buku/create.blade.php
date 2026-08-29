@@ -102,10 +102,9 @@
                         <div class="input-group">
                             <span class="input-group-text fw-bold" id="kode-prefix">---</span>
                             <input class="form-control bg-light" id="kode_buku_display" readonly
-                                placeholder="Otomatis dari kategori">
+                                placeholder="Auto-generate oleh sistem">
                         </div>
-                        <input type="hidden" name="kode_buku" id="kode_buku" value="{{ old('kode_buku') }}">
-                        <div class="form-text">ID diisi otomatis berdasarkan kategori yang dipilih.</div>
+                        <div class="form-text">ID digenerate otomatis oleh sistem (contoh: <code>001-01</code>, <code>002-01</code>, <code>003-01</code>).</div>
                     </div>
                     {{-- <div class="col-sm-6 col-12">
                         <label class="form-label" id="fakultas-label" for="fakultas">Fakultas</label>
@@ -158,7 +157,7 @@
                 }
             });
 
-            // Auto-set ID buku berdasarkan kategori
+            // Auto-set preview ID buku berdasarkan kategori
             function updateKodeBuku() {
                 var selected = $('#kategori_id option:selected');
                 var prefix = selected.data('prefix') || '';
@@ -166,12 +165,10 @@
 
                 if (prefix) {
                     $('#kode-prefix').text(prefix);
-                    $('#kode_buku_display').val(prefix + ' — ' + namaKat);
-                    $('#kode_buku').val(prefix); // hidden field yang dikirim ke server
+                    $('#kode_buku_display').val(prefix + '-XX (Auto-generate ' + namaKat + ')');
                 } else {
                     $('#kode-prefix').text('---');
                     $('#kode_buku_display').val('');
-                    $('#kode_buku').val('');
                 }
             }
 
@@ -180,5 +177,6 @@
         });
     </script>
 @endsection
+
 
 

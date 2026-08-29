@@ -97,4 +97,40 @@ class Buku extends Model
     {
         $this->increment('view');
     }
+
+    /**
+     * Generate kode_buku otomatis berdasarkan kategori (e.g. 001-01, 002-01, 003-01)
+     */
+    public static function generateKodeBuku($kategoriId)
+    {
+        $kategori = Kategori::find($kategoriId);
+        $prefix = '001';
+        if ($kategori) {
+            if ($kategori->nama === 'Mapel') {
+                $prefix = '001';
+            } elseif ($kategori->nama === 'Cerita') {
+                $prefix = '002';
+            } elseif ($kategori->nama === 'Novel') {
+                $prefix = '003';
+            }
+        }
+
+        $existingCodes = self::where('kode_buku', 'LIKE', $prefix . '-%')->pluck('kode_buku');
+        $maxNum = 0;
+        foreach ($existingCodes as $code) {
+            $parts = explode('-', $code);
+            if (isset($parts[1]) && is_numeric($parts[1])) {
+                $num = (int) $parts[1];
+                if ($num > $maxNum) {
+                    $maxNum = $num;
+                }
+            }
+        }
+
+        $nextNum = $maxNum + 1;
+        $suffix = str_pad($nextNum, 2, '0', STR_PAD_LEFT);
+
+        return $prefix . '-' . $suffix;
+    }
 }
+

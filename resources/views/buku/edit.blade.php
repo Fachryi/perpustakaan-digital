@@ -26,19 +26,28 @@
                 @method('PUT')
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label">ID Buku</label>
+                        <label class="form-label" for="kode_suffix">ID Buku <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text fw-bold" id="kode-prefix">
                                 @if($buku->kategori)
                                     {{ $buku->kategori->nama == 'Mapel' ? '001' : ($buku->kategori->nama == 'Cerita' ? '002' : '003') }}
                                 @else
-                                    ---
+                                    001
                                 @endif
                             </span>
-                            <input class="form-control bg-light" id="kode_buku_display" readonly
-                                value="{{ $buku->kode_buku ?? '' }}">
+                            <span class="input-group-text">-</span>
+                            @php
+                                $currentSuffix = '';
+                                if (!empty($buku->kode_buku)) {
+                                    $parts = explode('-', $buku->kode_buku);
+                                    $currentSuffix = count($parts) > 1 ? end($parts) : $buku->kode_buku;
+                                }
+                            @endphp
+                            <input type="text" class="form-control" id="kode_suffix" name="kode_suffix"
+                                placeholder="01" maxlength="5" required
+                                value="{{ old('kode_suffix', $currentSuffix) }}">
                         </div>
-                        <div class="form-text">Jika kategori diubah, ID akan diperbarui otomatis sesuai kategori baru.</div>
+                        <div class="form-text">3 angka depan dari kategori. Masukkan 2 angka belakangnya (contoh: <code>01</code>).</div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label" for="judul">Judul <span class="text-danger">*</span></label>
@@ -155,31 +164,16 @@
                 }
             });
 
-            var originalKodeBuku = "{{ $buku->kode_buku ?? '' }}";
-            var originalKatId = "{{ $buku->kategori_id ?? '' }}";
-
-            // Auto-update ID buku saat kategori berubah
-            function updateKodeBuku() {
+            // Auto-update prefix ID buku berdasarkan kategori
+            function updatePrefix() {
                 var selected = $('#kategori_id option:selected');
-                var prefix = selected.data('prefix') || '';
-                var namaKat = selected.text().trim();
-                var currentKatId = $('#kategori_id').val();
-
-                if (prefix) {
-                    $('#kode-prefix').text(prefix);
-                    if (currentKatId == originalKatId) {
-                        $('#kode_buku_display').val(originalKodeBuku);
-                    } else {
-                        $('#kode_buku_display').val(prefix + '-XX (Auto-generate saat disimpan)');
-                    }
-                } else {
-                    $('#kode-prefix').text('---');
-                    $('#kode_buku_display').val('');
-                }
+                var prefix = selected.data('prefix') || '---';
+                $('#kode-prefix').text(prefix);
             }
 
-            $('#kategori_id').on('change', updateKodeBuku);
+            $('#kategori_id').on('change', updatePrefix);
         });
     </script>
 @endsection
+
 

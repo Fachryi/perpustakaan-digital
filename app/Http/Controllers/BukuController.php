@@ -81,6 +81,7 @@ class BukuController extends Controller
             'foto'        => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'abstrak'     => ['nullable', 'string'],
             'kategori_id' => ['required', 'exists:kategori,id'],
+            'kode_suffix' => ['required'],
         ];
 
         if (auth()->user()->role == 'admin') {
@@ -104,7 +105,21 @@ class BukuController extends Controller
             $fotoPath = $request->file('foto')->store('foto_buku', 'public');
         }
 
-        $kodeBuku = Buku::generateKodeBuku($request->kategori_id);
+        $kat = Kategori::find($request->kategori_id);
+        $prefix = '001';
+        if ($kat) {
+            if ($kat->nama === 'Mapel') $prefix = '001';
+            elseif ($kat->nama === 'Cerita') $prefix = '002';
+            elseif ($kat->nama === 'Novel') $prefix = '003';
+        }
+
+        $rawSuffix = trim($request->kode_suffix);
+        if (str_contains($rawSuffix, '-')) {
+            $parts = explode('-', $rawSuffix);
+            $rawSuffix = end($parts);
+        }
+        $suffix = is_numeric($rawSuffix) ? str_pad((int)$rawSuffix, 2, '0', STR_PAD_LEFT) : $rawSuffix;
+        $kodeBuku = $prefix . '-' . $suffix;
 
         $buku = Buku::create([
             'kode_buku'   => $kodeBuku,
@@ -164,6 +179,7 @@ class BukuController extends Controller
             'file'         => ['nullable', 'file', 'mimes:pdf', 'max:20480'],
             'foto'         => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'kategori_id'  => ['required', 'exists:kategori,id'],
+            'kode_suffix'  => ['required'],
         ];
 
         if (auth()->user()->role == 'admin') {
@@ -178,10 +194,21 @@ class BukuController extends Controller
             Storage::disk('public')->makeDirectory('foto_buku');
         }
 
-        $kodeBuku = $buku->kode_buku;
-        if ($buku->kategori_id != $request->kategori_id || empty($kodeBuku) || !str_contains($kodeBuku, '-')) {
-            $kodeBuku = Buku::generateKodeBuku($request->kategori_id);
+        $kat = Kategori::find($request->kategori_id);
+        $prefix = '001';
+        if ($kat) {
+            if ($kat->nama === 'Mapel') $prefix = '001';
+            elseif ($kat->nama === 'Cerita') $prefix = '002';
+            elseif ($kat->nama === 'Novel') $prefix = '003';
         }
+
+        $rawSuffix = trim($request->kode_suffix);
+        if (str_contains($rawSuffix, '-')) {
+            $parts = explode('-', $rawSuffix);
+            $rawSuffix = end($parts);
+        }
+        $suffix = is_numeric($rawSuffix) ? str_pad((int)$rawSuffix, 2, '0', STR_PAD_LEFT) : $rawSuffix;
+        $kodeBuku = $prefix . '-' . $suffix;
 
         $buku->update([
             'kode_buku'   => $kodeBuku,

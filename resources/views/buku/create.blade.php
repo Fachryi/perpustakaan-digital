@@ -98,13 +98,15 @@
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">ID Buku</label>
+                        <label class="form-label" for="kode_suffix">ID Buku <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text fw-bold" id="kode-prefix">---</span>
-                            <input class="form-control bg-light" id="kode_buku_display" readonly
-                                placeholder="Auto-generate oleh sistem">
+                            <span class="input-group-text">-</span>
+                            <input type="text" class="form-control" id="kode_suffix" name="kode_suffix"
+                                placeholder="01" maxlength="5" required
+                                value="{{ old('kode_suffix') }}">
                         </div>
-                        <div class="form-text">ID digenerate otomatis oleh sistem (contoh: <code>001-01</code>, <code>002-01</code>, <code>003-01</code>).</div>
+                        <div class="form-text">3 angka depan dari kategori. Masukkan 2 angka belakangnya (contoh: <code>01</code>, <code>02</code>).</div>
                     </div>
                     {{-- <div class="col-sm-6 col-12">
                         <label class="form-label" id="fakultas-label" for="fakultas">Fakultas</label>
@@ -157,26 +159,19 @@
                 }
             });
 
-            // Auto-set preview ID buku berdasarkan kategori
-            function updateKodeBuku() {
+            // Auto-update prefix ID buku berdasarkan kategori
+            function updatePrefix() {
                 var selected = $('#kategori_id option:selected');
-                var prefix = selected.data('prefix') || '';
-                var namaKat = selected.text().trim();
-
-                if (prefix) {
-                    $('#kode-prefix').text(prefix);
-                    $('#kode_buku_display').val(prefix + '-XX (Auto-generate ' + namaKat + ')');
-                } else {
-                    $('#kode-prefix').text('---');
-                    $('#kode_buku_display').val('');
-                }
+                var prefix = selected.data('prefix') || '---';
+                $('#kode-prefix').text(prefix);
             }
 
-            $('#kategori_id').on('change', updateKodeBuku);
-            updateKodeBuku(); // Jalankan saat pertama load
+            $('#kategori_id').on('change', updatePrefix);
+            updatePrefix(); // Jalankan saat pertama load
         });
     </script>
 @endsection
+
 
 
 
